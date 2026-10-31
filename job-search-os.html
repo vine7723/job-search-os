@@ -1,0 +1,2901 @@
+<!DOCTYPE html>
+<!-- 本工作台通过 WorkBuddy「资料库」skill 搭建与部署 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Job Search OS">
+<title>Job Search OS V1.1 · 求职工作台与项目作品</title>
+<style>
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --surface-2:#fafbfc; --surface-3:#f2f4f7;
+  --border:#e4e7ec; --border-strong:#d0d5dd;
+  --text:#101828; --text-2:#475467; --text-3:#98a2b3;
+  --primary:#3b5bdb; --primary-weak:#eef2ff; --primary-strong:#2f49a8;
+  --success:#12b76a; --success-weak:#e7f8f0;
+  --warn:#f79009; --warn-weak:#fef4e6;
+  --danger:#f04438; --danger-weak:#fee4e2;
+  --purple:#7a5af8; --purple-weak:#f4f0ff;
+  --cyan:#06aed4; --cyan-weak:#e0f5fb;
+  --info:#2e90fa; --info-weak:#e9f2fe;
+  --radius:10px; --radius-sm:7px;
+  --shadow:0 1px 2px rgba(16,24,40,.05);
+  --shadow-md:0 4px 14px rgba(16,24,40,.08);
+  --shadow-lg:0 12px 40px rgba(16,24,40,.16);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--text); font-size:14px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:14px;color:inherit}
+a{color:var(--primary);text-decoration:none}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#d0d5dd;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#b9c0cc}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- layout ---------- */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:230px;flex:0 0 230px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:40;
+}
+.brand{padding:18px 18px 14px;border-bottom:1px solid var(--border)}
+.brand-row{display:flex;align-items:center;gap:9px}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex:0 0 30px}
+.brand-mark svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2}
+.brand-name{font-size:14.5px;font-weight:700;letter-spacing:.2px}
+.brand-sub{font-size:11px;color:var(--text-3);margin-top:1px}
+.nav{padding:10px 10px;flex:1;overflow-y:auto}
+.nav-sec{font-size:10.5px;color:var(--text-3);font-weight:600;letter-spacing:.9px;padding:12px 9px 6px;text-transform:uppercase}
+.nav-item{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);
+  cursor:pointer;color:var(--text-2);font-size:13.5px;font-weight:500;position:relative;
+  border:none;background:none;width:100%;text-align:left;min-height:38px;
+}
+.nav-item:hover{background:var(--surface-3);color:var(--text)}
+.nav-item.active{background:var(--primary-weak);color:var(--primary-strong);font-weight:600}
+.nav-item.active::before{content:"";position:absolute;left:-10px;top:9px;bottom:9px;width:3px;background:var(--primary);border-radius:0 3px 3px 0}
+.nav-item svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;flex:0 0 16px;opacity:.85}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--surface-3);color:var(--text-2);font-size:11px;font-weight:600;padding:1px 6px;border-radius:20px;min-width:20px;text-align:center}
+.nav-item.active .nav-badge{background:#dbe4ff;color:var(--primary-strong)}
+.nav-badge.hot{background:var(--danger-weak);color:var(--danger)}
+.sidebar-foot{padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{
+  height:56px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;padding:0 20px;position:sticky;top:0;z-index:30;
+}
+.crumb{font-size:15px;font-weight:650;display:flex;align-items:center;gap:8px;min-width:0}
+.crumb-en{font-size:11.5px;color:var(--text-3);font-weight:500}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.content{flex:1;padding:18px 20px 40px;min-width:0}
+.mobile-only{display:none}
+
+/* ---------- today strip ---------- */
+.today-strip{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px}
+.today-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.today-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.today-title svg{width:15px;height:15px;stroke:var(--primary);fill:none;stroke-width:2}
+.today-count{font-size:11.5px;color:var(--text-3);font-weight:500}
+.today-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.today-card{
+  flex:0 0 auto;min-width:230px;max-width:300px;border:1px solid var(--border);border-radius:var(--radius);
+  padding:9px 11px;background:var(--surface-2);display:flex;gap:9px;align-items:flex-start;
+}
+.today-card.overdue{border-color:#fecdca;background:#fffbfa}
+.today-card .tc-body{flex:1;min-width:0}
+.tc-comp{font-size:12.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-role{font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-act{font-size:12.5px;color:var(--text-2);margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tc-meta{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap}
+.today-empty{font-size:12.5px;color:var(--text-3);padding:2px 0}
+
+/* ---------- generic ---------- */
+.h-page{display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.h-title{font-size:19px;font-weight:700;margin:0}
+.h-desc{font-size:12.5px;color:var(--text-3)}
+.grid{display:grid;gap:12px}
+.grid-6{grid-template-columns:repeat(6,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-pad{padding:14px 16px}
+.card-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-head h3{margin:0;font-size:13.5px;font-weight:650}
+.card-head .sub{font-size:11.5px;color:var(--text-3)}
+.card-head .right{margin-left:auto;display:flex;gap:6px;align-items:center}
+
+.metric{padding:13px 14px}
+.metric-label{font-size:11.5px;color:var(--text-3);font-weight:600;display:flex;align-items:center;gap:5px}
+.metric-label svg{width:13px;height:13px;stroke:var(--text-3);fill:none;stroke-width:2}
+.metric-val{font-size:25px;font-weight:750;letter-spacing:-.5px;margin-top:4px;line-height:1.1}
+.metric-foot{font-size:11px;color:var(--text-3);margin-top:2px}
+.metric.accent-b .metric-val{color:var(--primary)}
+.metric.accent-g .metric-val{color:var(--success)}
+.metric.accent-p .metric-val{color:var(--purple)}
+.metric.accent-c .metric-val{color:var(--cyan)}
+.metric.accent-w .metric-val{color:var(--warn)}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:7px 12px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);
+  background:var(--surface);color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;
+  min-height:36px;white-space:nowrap;transition:.12s;
+}
+.btn:hover{background:var(--surface-3);color:var(--text)}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-strong);border-color:var(--primary-strong);color:#fff}
+.btn-ghost{border-color:transparent;background:transparent}
+.btn-ghost:hover{background:var(--surface-3)}
+.btn-danger{color:var(--danger);border-color:#fecdca;background:var(--surface)}
+.btn-danger:hover{background:var(--danger-weak);color:var(--danger)}
+.btn-sm{padding:4px 9px;min-height:30px;font-size:12px;border-radius:6px}
+.btn-xs{padding:2px 7px;min-height:26px;font-size:11.5px;border-radius:6px}
+.btn-full{width:100%}
+
+.tag{display:inline-flex;align-items:center;gap:4px;padding:1.5px 8px;border-radius:20px;font-size:11.5px;font-weight:600;line-height:1.7;white-space:nowrap}
+.tag-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;background:var(--surface-3);font-size:11.5px;color:var(--text-2);font-weight:500}
+.chip svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;flex:0 0 12px}
+.small svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:-2px}
+.arrow-ico svg{width:13px;height:13px;stroke:var(--primary);fill:none;stroke-width:2.4;display:block}
+.p0{background:var(--danger-weak);color:#b42318}
+.p1{background:var(--warn-weak);color:#b54708}
+.p2{background:var(--surface-3);color:var(--text-2)}
+
+.field{margin-bottom:11px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:4px}
+.field .hint{font-size:11px;color:var(--text-3);font-weight:400;margin-top:3px}
+input[type=text],input[type=date],input[type=number],input[type=url],select,textarea{
+  width:100%;padding:8px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);
+  background:var(--surface);font-size:16px;outline:none;transition:.12s;
+}
+@media(min-width:769px){input[type=text],input[type=date],input[type=number],input[type=url],select,textarea{font-size:13.5px}}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,91,219,.12)}
+textarea{resize:vertical;min-height:70px;line-height:1.6}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+.empty{text-align:center;padding:38px 20px;color:var(--text-3)}
+.empty svg{width:38px;height:38px;stroke:var(--border-strong);fill:none;stroke-width:1.6;margin-bottom:8px}
+.empty p{margin:0 0 12px;font-size:13px}
+
+/* ---------- modal ---------- */
+.mask{position:fixed;inset:0;background:rgba(16,24,40,.45);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:28px 14px;overflow-y:auto}
+.modal{background:var(--surface);border-radius:12px;width:100%;max-width:600px;box-shadow:var(--shadow-lg);margin:auto 0}
+.modal.wide{max-width:840px}
+.modal-head{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.modal-head h3{margin:0;font-size:15px;font-weight:700}
+.modal-head .x{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--text-3);padding:6px;border-radius:6px;display:flex;min-height:36px;min-width:36px;align-items:center;justify-content:center}
+.modal-head .x:hover{background:var(--surface-3);color:var(--text)}
+.modal-head .x svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.modal-body{padding:16px 18px;max-height:64vh;overflow-y:auto}
+.modal-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface);border-radius:0 0 12px 12px}
+
+.toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(14px);background:#101828;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;z-index:200;opacity:0;pointer-events:none;transition:.22s;box-shadow:var(--shadow-md);max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- table / list ---------- */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:11.5px;color:var(--text-3);font-weight:650;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface-2)}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover{background:var(--surface-2)}
+
+/* ---------- split (opportunities) ---------- */
+.split{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:start}
+.list-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:sticky;top:74px;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
+.list-tools{padding:10px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.search-wrap{position:relative}
+.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--text-3);fill:none;stroke-width:2;pointer-events:none}
+.search-wrap input{padding-left:30px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters select{padding:5px 8px;font-size:12px;min-height:32px;width:auto;flex:1;min-width:0}
+.list-scroll{overflow-y:auto;flex:1}
+.opp-item{padding:11px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;border-left:3px solid transparent}
+.opp-item:hover{background:var(--surface-2)}
+.opp-item.active{background:var(--primary-weak);border-left-color:var(--primary)}
+.opp-top{display:flex;align-items:flex-start;gap:8px}
+.opp-co{font-size:13.5px;font-weight:650;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opp-role{font-size:12.5px;color:var(--text-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opp-meta{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+.opp-next{font-size:11.5px;color:var(--text-3);margin-top:5px;display:flex;gap:5px;align-items:flex-start}
+.opp-next svg{width:12px;height:12px;flex:0 0 12px;margin-top:3px;stroke:var(--text-3);fill:none;stroke-width:2}
+.opp-next.od{color:var(--danger)}
+.opp-next.od svg{stroke:var(--danger)}
+
+.detail-panel{min-width:0}
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden}
+.sec-head{padding:11px 15px;display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+.sec-num{width:20px;height:20px;border-radius:5px;background:var(--primary-weak);color:var(--primary-strong);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 20px}
+.sec-title{font-size:13.5px;font-weight:650}
+.sec-sub{font-size:11.5px;color:var(--text-3);margin-left:auto}
+.sec-head .chev{margin-left:8px;width:14px;height:14px;stroke:var(--text-3);fill:none;stroke-width:2.2;transition:.15s;flex:0 0 14px}
+.sec.collapsed .sec-head .chev{transform:rotate(-90deg)}
+.sec.collapsed .sec-body{display:none}
+.sec-body{padding:13px 15px;border-top:1px solid var(--border)}
+
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:11px 14px}
+.kv-item .k{font-size:11px;color:var(--text-3);font-weight:600;margin-bottom:2px}
+.kv-item .v{font-size:13px;font-weight:550;word-break:break-word}
+.jd-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;font-size:12.5px;line-height:1.75;white-space:pre-wrap;max-height:300px;overflow-y:auto;color:var(--text-2)}
+
+.req-row{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--border)}
+.req-row:last-child{border-bottom:none}
+.req-main{flex:1;min-width:0}
+.req-text{font-size:13px;font-weight:550}
+.req-note{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.match-grid{display:flex;flex-direction:column;gap:8px}
+.match-row{border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;background:var(--surface-2)}
+.match-top{display:flex;gap:8px;align-items:flex-start}
+.match-req{font-size:12.5px;font-weight:600;flex:1;min-width:0}
+.match-ev{font-size:12.5px;color:var(--text-2);margin-top:4px;display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
+.arrow-ico{width:13px;height:13px;stroke:var(--primary);fill:none;stroke-width:2.4;flex:0 0 13px;margin-top:4px}
+.strength{font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px}
+.s-strong{background:var(--success-weak);color:#027a48}
+.s-mid{background:var(--warn-weak);color:#b54708}
+.s-weak{background:var(--danger-weak);color:#b42318}
+
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:11px;padding:0 0 14px;position:relative}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 26px;font-size:11px;font-weight:700;color:#fff;z-index:1}
+.tl-item:not(:last-child)::before{content:"";position:absolute;left:12.5px;top:26px;bottom:0;width:2px;background:var(--border)}
+.tl-body{flex:1;min-width:0;padding-top:2px}
+.tl-title{font-size:13px;font-weight:650}
+.tl-meta{font-size:11.5px;color:var(--text-3);margin-top:1px}
+.tl-note{font-size:12.5px;color:var(--text-2);margin-top:4px;white-space:pre-wrap;line-height:1.6}
+
+.next-box{border:1px solid var(--primary);background:var(--primary-weak);border-radius:var(--radius);padding:12px 14px}
+.next-box.od{border-color:#fecdca;background:#fffbfa}
+.next-label{font-size:11px;font-weight:700;color:var(--primary-strong);letter-spacing:.4px}
+.next-box.od .next-label{color:#b42318}
+.next-act{font-size:15px;font-weight:700;margin-top:3px;line-height:1.4}
+.next-due{font-size:12px;color:var(--text-2);margin-top:5px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.next-due svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.next-due.od{color:var(--danger);font-weight:650}
+
+.funnel{display:flex;flex-direction:column;gap:9px}
+.fn-row{display:flex;align-items:center;gap:10px}
+.fn-name{width:64px;flex:0 0 64px;font-size:12px;color:var(--text-2);font-weight:600}
+.fn-bar-wrap{flex:1;background:var(--surface-3);border-radius:5px;height:26px;position:relative;overflow:hidden}
+.fn-bar{height:100%;border-radius:5px;display:flex;align-items:center;padding:0 9px;color:#fff;font-size:12px;font-weight:700;min-width:34px;transition:width .4s}
+.fn-rate{width:62px;flex:0 0 62px;text-align:right;font-size:11.5px;color:var(--text-3);font-weight:600}
+
+.placeholder-note{background:var(--surface-2);border:1px dashed var(--border-strong);border-radius:var(--radius-sm);padding:9px 12px;font-size:12px;color:var(--text-3);margin-bottom:12px;display:flex;gap:7px;align-items:flex-start}
+.placeholder-note svg{width:14px;height:14px;flex:0 0 14px;margin-top:2px;stroke:var(--text-3);fill:none;stroke-width:2}
+
+.ev-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:7px}
+.ev-head{display:flex;align-items:flex-start;gap:8px}
+.ev-name{font-size:14px;font-weight:680;flex:1;min-width:0}
+.ev-sec-t{font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.5px;margin-top:2px}
+.ev-line{font-size:12.5px;color:var(--text-2);line-height:1.6}
+.ev-line b{color:var(--text-3);font-weight:650;font-size:11px;display:inline-block;min-width:44px}
+.ev-foot{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px;padding-top:8px;border-top:1px dashed var(--border)}
+
+.divider{height:1px;background:var(--border);margin:14px 0}
+.row-between{display:flex;align-items:center;gap:8px}
+.muted{color:var(--text-3)}
+.small{font-size:12px}
+.b{font-weight:650}
+.backup-tip{background:var(--warn-weak);border:1px solid #fedf89;color:#b54708;border-radius:var(--radius-sm);padding:8px 12px;font-size:12.5px;margin-bottom:12px;display:flex;gap:8px;align-items:center}
+.backup-tip svg{width:15px;height:15px;flex:0 0 15px;stroke:currentColor;fill:none;stroke-width:2}
+.backup-tip button{margin-left:auto}
+
+/* ================= V2 新增样式 ================= */
+.goal-card{background:linear-gradient(135deg,#eef2ff 0%,#f7f4ff 100%);border:1px solid #dbe4ff;border-radius:var(--radius);padding:13px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.goal-card .g-label{font-size:11px;font-weight:750;letter-spacing:.8px;color:var(--primary-strong)}
+.goal-card .g-text{font-size:16px;font-weight:730;margin-top:2px;line-height:1.4}
+.goal-card .g-date{font-size:12.5px;color:var(--text-2);margin-top:3px}
+.nba{border:1px solid var(--primary);background:linear-gradient(135deg,#eef2ff 0%,#fbfcff 100%);border-radius:var(--radius);padding:15px 17px;box-shadow:var(--shadow)}
+.nba .nba-label{font-size:11px;font-weight:750;letter-spacing:1.2px;color:var(--primary-strong);display:flex;align-items:center;gap:6px}
+.nba .nba-title{font-size:19px;font-weight:760;margin-top:5px;line-height:1.42;letter-spacing:-.2px}
+.nba .nba-reason{font-size:12.5px;color:var(--text-2);margin-top:6px;line-height:1.65}
+.nba .nba-acts{margin-top:11px;display:flex;gap:7px;flex-wrap:wrap}
+.bottleneck{border-left:3px solid var(--warn);background:var(--warn-weak);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:11px 14px}
+.bottleneck .b-t{font-size:13px;font-weight:720;color:#b54708;display:flex;align-items:center;gap:6px}
+.bottleneck .b-d{font-size:12.5px;color:var(--text-2);margin-top:4px;line-height:1.7}
+.up-grp{margin-bottom:15px}
+.up-grp:last-child{margin-bottom:0}
+.up-title{font-size:11.5px;font-weight:720;color:var(--text-3);letter-spacing:.5px;display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.up-title .n{background:var(--surface-3);color:var(--text-2);border-radius:20px;padding:0 7px;font-size:11px;font-weight:700}
+.up-title.hot .n{background:var(--danger-weak);color:var(--danger)}
+.up-row{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--border)}
+.up-row:last-child{border-bottom:none}
+.up-row .t{font-size:12.5px;font-weight:600;flex:1;min-width:0}
+.up-row .s{font-size:11.5px;color:var(--text-3);margin-top:1px}
+.copilot-btn{border-style:dashed;border-color:#c7d2fe;color:var(--primary-strong);background:#f8f9ff}
+.copilot-btn:hover{background:var(--primary-weak);color:var(--primary-strong);border-color:var(--primary)}
+.type-tag{font-size:11px;font-weight:720;padding:1.5px 7px;border-radius:5px;white-space:nowrap;display:inline-block}
+.gt-Presentation{background:#e0f5fb;color:#0b7285}
+.gt-Weak{background:#fef4e6;color:#b54708}
+.gt-Adjacent{background:#f4f0ff;color:#6941c6}
+.gt-True{background:#fee4e2;color:#b42318}
+.st-Strong{background:#e7f8f0;color:#027a48}
+.st-Medium{background:#fef4e6;color:#b54708}
+.st-Weak{background:#fee4e2;color:#b42318}
+.sub-card{border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;background:var(--surface-2);margin-bottom:8px}
+.sub-card .sc-t{font-size:13px;font-weight:650}
+.sub-card .sc-m{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.chain{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:11px;color:var(--text-3);font-weight:650}
+.chain i{font-style:normal;background:var(--surface-3);border-radius:5px;padding:2px 7px}
+.chain i.hi{background:var(--primary-weak);color:var(--primary-strong)}
+.chain .ar{color:var(--primary);font-weight:800}
+.market-path{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:11.5px;color:var(--text-2);margin-top:5px}
+.market-path span{background:var(--surface-3);border-radius:5px;padding:1px 6px}
+.market-path em{font-style:normal;color:var(--text-3)}
+.act-row{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--border)}
+.act-row .a-t{font-size:12.5px;font-weight:600;flex:1;min-width:0}
+/* V2：子 Tab / 市场路径 / Action */
+.subtabs{display:flex;gap:3px;flex-wrap:wrap;padding:3px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px}
+.subtab{border:none;background:transparent;padding:7px 12px;border-radius:6px;font-size:13px;font-weight:620;color:var(--text-3);cursor:pointer;min-height:38px;display:flex;align-items:center;gap:6px;font-family:inherit}
+.subtab:hover{color:var(--text-1)}
+.subtab.active{background:var(--surface-1);color:var(--text-1);box-shadow:var(--shadow-sm)}
+.subtab .n{font-size:11px;padding:1px 6px;border-radius:99px;background:var(--border);color:var(--text-3);font-weight:650}
+.subtab.active .n{background:var(--primary-weak);color:var(--primary-strong)}
+.sub-head{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:720;color:var(--text-3);letter-spacing:.02em;margin-bottom:5px}
+.sub-head .btn{margin-left:auto}
+.act-main{flex:1;min-width:0}
+.act-done .act-t{text-decoration:line-through;color:var(--text-3)}
+.mp-city{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;margin-top:8px;color:var(--text-1)}
+.mp-city svg{width:14px;height:14px;color:var(--primary)}
+.mp-ind{font-size:11.5px;color:var(--text-3);margin:6px 0 4px;padding-left:20px;font-weight:600}
+.mp-co{display:flex;gap:5px;flex-wrap:wrap;padding-left:20px;margin-bottom:4px}
+
+@media(max-width:1100px){ .grid-6{grid-template-columns:repeat(3,1fr)} .split{grid-template-columns:300px 1fr} }
+@media(max-width:900px){
+  .app{flex-direction:column}
+  .sidebar{
+    position:fixed;bottom:0;left:0;right:0;top:auto;width:100%;height:auto;flex:none;
+    border-right:none;border-top:1px solid var(--border);flex-direction:row;z-index:60;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .brand,.sidebar-foot,.nav-sec{display:none}
+  .nav{display:flex;overflow-x:auto;padding:5px 6px;gap:2px;flex:none}
+  .nav-item{flex-direction:column;gap:3px;padding:6px 10px;min-width:60px;min-height:52px;font-size:10.5px;align-items:center;justify-content:center;text-align:center}
+  .nav-item svg{width:17px;height:17px}
+  .nav-item.active::before{display:none}
+  .nav-badge{display:none}
+  .main{padding-bottom:64px}
+  .content{padding:14px 12px 30px}
+  .today-strip{padding:10px 12px}
+  .topbar{padding:0 12px;height:52px}
+  .crumb{font-size:14px}
+  .grid-6,.grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+  .split.has-detail .list-panel{display:none}
+  .list-panel{position:static;max-height:none}
+  .list-scroll{max-height:340px}
+  .kv{grid-template-columns:repeat(2,1fr)}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+  .modal{max-width:100%}
+  .mobile-only{display:block}
+  .hide-mobile{display:none}
+  .sec-sub{display:none}
+}
+@media(max-width:520px){ .grid-6,.grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)} .metric-val{font-size:21px} .kv{grid-template-columns:1fr} }
+
+/* V1.1: bounded icons and responsive content */
+svg{width:18px;height:18px;flex-shrink:0;max-width:100%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.grid>*{min-width:0}.card,.bottleneck,.nba,.modal{overflow-wrap:anywhere}.main{min-width:0}
+.modebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 22px;background:#eef2ff;border-bottom:1px solid var(--border);font-size:12px}
+.modebar strong{margin-right:auto}.modal{max-height:90dvh}.modal-body{overflow:auto}.modal-foot{flex-wrap:wrap}
+:focus-visible{outline:3px solid #3b5bdb;outline-offset:3px}.case-copy{line-height:1.85;max-width:900px}.case-copy h2{margin-top:24px}
+@media(max-width:900px){.main{padding-bottom:calc(90px + env(safe-area-inset-bottom))}.modebar{padding:10px 12px}.h-page,.card-head{flex-wrap:wrap}.grid-2{grid-template-columns:1fr}.modal{width:100%}}
+@media(max-width:520px){.grid-4:has(.metric){grid-template-columns:repeat(2,minmax(0,1fr))}.grid-2,.grid-3,.grid-4,.grid-6{grid-template-columns:1fr}.topbar{height:auto;min-height:52px;flex-wrap:wrap;gap:6px}.crumb-en{display:none}.modebar .btn{min-height:36px}.content{padding-bottom:40px}.fn-row{grid-template-columns:40px minmax(0,1fr) 80px}.modal-foot .btn{min-height:40px}}
+</style>
+<meta name="description" content="从 JD、能力证据到面试反馈的个人求职工作台。独立演示模式，无需登录，本地保存。"><link rel="icon" href="favicon.svg"></head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-row">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h11"/></svg>
+        </div>
+        <div>
+          <div class="brand-name">Job Search OS</div>
+          <div class="brand-sub">个人求职操作系统 V1.1</div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-foot">
+      <button class="btn btn-sm btn-full" data-act="export-json">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        导出 JSON 备份
+      </button>
+      <button class="btn btn-sm btn-full" data-act="import-json">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        导入恢复
+      </button>
+      <button class="btn btn-sm btn-full btn-danger" data-act="reset-data">清空当前模式数据</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">
+        <span id="crumbZh">求职总览</span>
+        <span class="crumb-en" id="crumbEn">Dashboard</span>
+      </div>
+      <div class="top-actions">
+        <span class="chip" id="dataChip" title="数据保存在本机浏览器，支持导出备份">
+          <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M20 6L9 17l-5-5"/></svg>
+          <span id="dataChipText">本地已保存</span>
+        </span>
+        <button class="btn btn-primary btn-sm" aria-label="新建岗位" data-act="quick-add">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="hide-mobile">新建岗位</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="modebar" id="modebar"></div><div class="today-strip" id="todayStrip"></div>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<div id="modalRoot"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept="application/json,.json" style="display:none">
+
+<script>
+/* ============================================================
+   Job Search OS V1  ——  单文件 / 全内联 / 零外链
+   数据层 → 计算层 → 渲染层，统一入口 refreshAll()，渲染函数之间互不调用
+   ============================================================ */
+/* ================= 常量与字典 ================= */
+var IS_DEMO = new URLSearchParams(location.search).get('mode') !== 'personal';
+var P = IS_DEMO ? 'jobos_demo_v11_' : 'wb_jobos_';
+var persisted = null, undoSnapshot = null, storageFailed = false;
+var STORES = ['opportunities','evidence','targets','resumes','interviews','feedbacks','gaps','research',
+              'contacts','lessons','strategies','actions','questions','stories','companies','meta'];
+
+var STATUS_FLOW = ['收藏','待分析','待投递','已投递','HR沟通','一面','二面','终面','Offer'];
+var STATUS_SIDE = ['Rejected','放弃','Closed'];
+var STATUS_ALL = STATUS_FLOW.concat(STATUS_SIDE);
+
+var STATUS_COLOR = {
+  '收藏':'#98a2b3','待分析':'#2e90fa','待投递':'#f79009','已投递':'#3b5bdb','HR沟通':'#06aed4',
+  '一面':'#9e77f3','二面':'#7a5af8','终面':'#6941c6','Offer':'#12b76a',
+  'Rejected':'#f04438','放弃':'#98a2b3','Closed':'#475467'
+};
+var STATUS_WEAK = {
+  '收藏':'#f2f4f7','待分析':'#e9f2fe','待投递':'#fef4e6','已投递':'#eef2ff','HR沟通':'#e0f5fb',
+  '一面':'#f4f0ff','二面':'#f0eaff','终面':'#ece6fd','Offer':'#e7f8f0',
+  'Rejected':'#fee4e2','放弃':'#f2f4f7','Closed':'#e4e7ec'
+};
+var PRIORITIES = ['P0','P1','P2'];
+var EV_TYPES = ['临床','科研','数据分析','AI','产品','项目','沟通','领导力','奖项','内容输出'];
+var EV_COLOR = {
+  '临床':'#06aed4','科研':'#7a5af8','数据分析':'#2e90fa','AI':'#6941c6','产品':'#f79009',
+  '项目':'#3b5bdb','沟通':'#12b76a','领导力':'#dd2590','奖项':'#b54708','内容输出':'#475467'
+};
+var STRENGTHS = ['强','中','弱'];
+var INTERVIEW_ROUNDS = ['HR沟通','一面','二面','三面','终面','其他'];
+var RESEARCH_TYPES = ['公司','行业','岗位','技术','人脉','其他'];
+var GAP_STATUS = ['待开始','进行中','已完成'];
+/* ---- V2 新增字典 ---- */
+var GAP_TYPES = ['Presentation Gap','Weak Evidence','Adjacent Skill','True Gap'];
+var GAP_TYPE_KEY = { 'Presentation Gap':'Presentation', 'Weak Evidence':'Weak', 'Adjacent Skill':'Adjacent', 'True Gap':'True' };
+var GAP_TYPE_DESC = {
+  'Presentation Gap':'已经具备，只是简历或表达没呈现出来',
+  'Weak Evidence':'有相关经历，但证据不足',
+  'Adjacent Skill':'有相邻能力，可以迁移',
+  'True Gap':'当前确实缺乏该能力'
+};
+var EV_STRENGTHS = ['Strong','Medium','Weak'];
+var CONTACT_TYPES = ['HR','Hiring Manager','猎头','校友','内推联系人','面试官','其他'];
+var QUESTION_CATS = ['行为面试','专业/技术','案例/业务','动机/规划','反问','其他'];
+var STRATEGY_AREAS = ['投递优先级','简历策略','面试策略','方向选择','能力补强','人脉拓展'];
+var STRATEGY_STATUS = ['已采纳','观察中','已放弃'];
+var ACTION_STATUS = ['待开始','进行中','已完成'];
+var RES_VERDICTS = ['强烈推荐','值得投','观望','不匹配'];
+
+var IC = {
+  dashboard:'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+  target:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
+  briefcase:'M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zM16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M3 12h18',
+  layers:'M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5',
+  file:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6',
+  users:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  refresh:'M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10',
+  trending:'M23 6l-9.5 9.5-5-5L1 18M17 6h6v6',
+  book:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z',
+  plus:'M12 5v14M5 12h14',
+  clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6.5V12l4 2',
+  alert:'M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z',
+  search:'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35',
+  chev:'M6 9l6 6 6-6',
+  x:'M18 6L6 18M6 6l12 12',
+  edit:'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z',
+  trash:'M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2',
+  check:'M20 6L9 17l-5-5',
+  arrow:'M5 12h14M12 5l7 7-7 7',
+  user:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+  inbox:'M22 12h-6l-2 3h-4l-2-3H2M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z',
+  link:'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
+  copy:'M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2zM5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
+  filter:'M22 3H2l8 9.46V19l4 2v-8.54L22 3z',
+  star:'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+  flag:'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7'
+};
+
+var NAV = [
+  {k:'dashboard',  zh:'求职总览',        en:'Dashboard',        ic:'dashboard'},
+  {k:'targets',    zh:'目标岗位',        en:'Target Roles',     ic:'target'},
+  {k:'opps',       zh:'岗位与公司库',    en:'Opportunities',    ic:'briefcase'},
+  {k:'evidence',   zh:'个人证据库',      en:'Evidence Bank',    ic:'layers'},
+  {k:'resume',     zh:'简历中心',        en:'Resume Lab',       ic:'file'},
+  {k:'interview',  zh:'面试中心',        en:'Interview Hub',    ic:'users'},
+  {k:'feedback',   zh:'反馈复盘',        en:'Feedback',         ic:'refresh'},
+  {k:'gap',        zh:'能力缺口与行动',  en:'Gap & Action',     ic:'trending'},
+  {k:'research',   zh:'行业与公司资料库',en:'Research',         ic:'book'}
+];
+
+/* ================= 数据层（只读写 storage，不碰 DOM） ================= */
+var DB = {};
+
+function uid(){ return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function loadAll(){
+  var raw = localStorage.getItem(P+'snapshot');
+  if(raw){ DB = validateBackup(JSON.parse(raw)); persisted=JSON.stringify(DB); return; }
+  STORES.forEach(function(k){
+    var value=localStorage.getItem(P+k);
+    DB[k]=value ? JSON.parse(value) : (k==='meta'?{}:{items:[]});
+  });
+  if(IS_DEMO){ seedDemo(); saveAll(); }
+  else { validateBackup(DB); persisted=JSON.stringify(DB); }
+}
+function saveAll(){
+  var next=JSON.stringify(DB);
+  try{ localStorage.setItem(P+'snapshot',next); }
+  catch(e){ storageFailed=true; if(persisted) DB=JSON.parse(persisted); toast('保存失败：请释放存储空间并导出备份。本次修改未保存。'); throw new Error('本地存储写入失败'); }
+  if(persisted && persisted!==next) undoSnapshot=persisted;
+  persisted=next; storageFailed=false; return true;
+}
+function validateBackup(data){
+  function obj(x){return x && typeof x==='object' && !Array.isArray(x);}
+  if(!obj(data)) throw Error('备份必须是对象');
+  var out={}, found=false;
+  function check(x, depth){
+    if(depth>12) throw Error('数据嵌套过深');
+    if(x===null || typeof x==='string' || typeof x==='boolean' || (typeof x==='number' && Number.isFinite(x))) return;
+    if(Array.isArray(x)){x.forEach(function(v){check(v,depth+1);});return;}
+    if(!obj(x)) throw Error('字段类型无效');
+    Object.keys(x).forEach(function(k){
+      if(['__proto__','prototype','constructor'].indexOf(k)>=0) throw Error('危险字段');
+      var v=x[k];
+      if(['reqs','matches','statusHistory','evidenceIds'].indexOf(k)>=0){if(!Array.isArray(v))throw Error(k+' 必须是数组');if(k==='evidenceIds' && v.some(function(id){return typeof id!=='string';}))throw Error('evidenceIds 必须为文本数组');}
+      else if(v!==null && typeof v!=='string' && typeof v!=='boolean' && !(['score','rating','order','matchScore'].includes(k) && typeof v==='number')) throw Error(k+' 字段类型错误');
+      check(v,depth+1);
+    });
+  }
+  STORES.forEach(function(k){
+    if(k==='meta'){if(data.meta && !obj(data.meta))throw Error('meta 类型错误'); out.meta=data.meta||{}; return;}
+    if(data[k]===undefined){out[k]={items:[]};return;}
+    found=true;
+    if(!obj(data[k]) || !Array.isArray(data[k].items)) throw Error(k+' 缺少 items 数组');
+    var ids=new Set();
+    data[k].items.forEach(function(it){
+      if(!obj(it) || typeof it.id!=='string' || !it.id || ids.has(it.id)) throw Error(k+' ID 无效或重复'); ids.add(it.id);
+      check(it,0);
+      ['reqs','matches'].forEach(function(f){var seen=new Set();(it[f]||[]).forEach(function(v){if(!obj(v)||typeof v.id!=='string'||!v.id||seen.has(v.id))throw Error(f+' 子记录 ID 无效');seen.add(v.id);if(f==='reqs' && typeof v.text!=='string')throw Error('要求必须有文本');if(f==='matches' && (typeof v.reqId!=='string'||typeof v.evId!=='string'))throw Error('匹配关联必须是文本 ID');});});
+      (it.statusHistory||[]).forEach(function(v){if(!obj(v)||STATUS_ALL.indexOf(v.status)<0||typeof v.at!=='string'||isNaN(Date.parse(v.at)))throw Error('状态历史格式无效');});
+      ['company','role','title','name','jd','oppId','evId','date','status'].forEach(function(f){if(it[f]!==undefined && typeof it[f]!=='string')throw Error(f+' 必须为文本');});
+      if(k==='opportunities' && STATUS_ALL.indexOf(it.status)<0)throw Error('岗位状态无效');
+      ['date','appliedDate','nextDue','due'].forEach(function(f){if(it[f] && (!/^\d{4}-\d{2}-\d{2}$/.test(it[f]) || isNaN(Date.parse(it[f])) || new Date(it[f]).toISOString().slice(0,10)!==it[f]))throw Error(f+' 日期无效');});
+    });
+    out[k]=data[k];
+  });
+  if(!found) throw Error('未找到业务数据');
+  if(out.meta.goal!==undefined && (!obj(out.meta.goal) || Object.values(out.meta.goal).some(function(v){return typeof v!=='string';})))throw Error('目标格式错误');
+  return JSON.parse(JSON.stringify(out));
+}
+function touch(k){ DB.meta[k] = new Date().toISOString(); }
+
+function listOf(k){ return (DB[k] && DB[k].items) ? DB[k].items : []; }
+function setList(k, arr){ DB[k] = DB[k] || {}; DB[k].items = arr; }
+function findById(k, id){ return listOf(k).filter(function(x){ return x.id === id; })[0] || null; }
+
+function addItem(k, obj){ obj.id = obj.id || uid(); obj.createdAt = obj.createdAt || todayStr(); obj.updatedAt = new Date().toISOString();
+  if(k==='opportunities')obj.statusHistory=[{status:obj.status,at:new Date().toISOString()}];
+  var arr = listOf(k); arr.unshift(obj); setList(k, arr); saveAll(); return obj; }
+function updateItem(k, id, patch){
+  var arr = listOf(k);
+  var old=findById(k,id);
+  if(k==='opportunities' && old && patch.status && patch.status!==old.status){patch.statusHistory=(old.statusHistory||[]).concat([{status:patch.status,at:new Date().toISOString()}]);}
+  for(var i=0;i<arr.length;i++){ if(arr[i].id === id){ for(var p in patch){ arr[i][p] = patch[p]; } arr[i].updatedAt = new Date().toISOString(); break; } }
+  setList(k, arr); saveAll();
+}
+function removeItem(k, id){ setList(k, listOf(k).filter(function(x){ return x.id !== id; })); saveAll(); }
+
+/* ================= 通用工具 ================= */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function svg(name,size,extra){return '<svg class="icon" aria-hidden="true" width="'+(size||18)+'" height="'+(size||18)+'" viewBox="0 0 24 24" '+(extra||'')+'><path d="'+(IC[name]||'')+'"/></svg>';}
+function ico(name,cls){return svg(name,18,cls?'class="icon '+cls+'"':'');}
+function pad(n){ return n<10 ? '0'+n : ''+n; }
+function dstr(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function todayStr(){ return dstr(new Date()); }
+function shiftDays(base, n){ var d = new Date((base||todayStr())+'T00:00:00'); d.setDate(d.getDate()+n); return dstr(d); }
+function diffDays(from, to){ return Math.round((new Date(to+'T00:00:00') - new Date(from+'T00:00:00'))/86400000); }
+function dueLabel(due){
+  if(!due) return '未设截止';
+  var d = diffDays(todayStr(), due);
+  if(d < 0) return '逾期 '+(-d)+' 天';
+  if(d === 0) return '今天截止';
+  if(d === 1) return '明天截止';
+  return d+' 天后';
+}
+function isOverdue(due){ return !!due && diffDays(todayStr(), due) < 0; }
+function cnDate(s){ if(!s) return '—'; var p = s.split('-'); return p.length===3 ? (p[1]*1)+'月'+(p[2]*1)+'日' : s; }
+function stageIdx(st){ var i = STATUS_FLOW.indexOf(st); return i<0 ? -1 : i; }
+function statusTag(st){
+  var c = STATUS_COLOR[st] || '#98a2b3', bg = STATUS_WEAK[st] || '#f2f4f7';
+  return '<span class="tag" style="background:'+bg+';color:'+c+'"><i class="tag-dot" style="background:'+c+'"></i>'+esc(st)+'</span>';
+}
+function prioTag(p){
+  if(!p) return '';
+  var cls = p==='P0'?'p0':(p==='P1'?'p1':'p2');
+  return '<span class="tag '+cls+'">'+esc(p)+'</span>';
+}
+function evTypeTag(t){
+  var c = EV_COLOR[t] || '#475467';
+  return '<span class="tag" style="background:'+c+'1a;color:'+c+'">'+esc(t||'未分类')+'</span>';
+}
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show';
+  clearTimeout(t._tm); t._tm = setTimeout(function(){ t.className = 'toast'; }, 2200);
+}
+
+/* ================= 弹层 ================= */
+function openModal(o){
+  var root = document.getElementById('modalRoot');
+  root.innerHTML =
+    '<div class="mask" data-act="mask"><div class="modal'+(o.wide?' wide':'')+'">' +
+      '<div class="modal-head"><h3>'+esc(o.title)+'</h3>' +
+        '<button class="x" data-act="close-modal" aria-label="关闭">'+ico('x')+'</button></div>' +
+      '<div class="modal-body">'+o.body+'</div>' +
+      (o.foot ? '<div class="modal-foot">'+o.foot+'</div>' : '') +
+    '</div></div>';
+  var dialog=root.querySelector('.modal');dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-label',o.title);var focus=dialog.querySelector('input,textarea,select,button');if(focus)focus.focus();
+}
+function closeModal(){ document.getElementById('modalRoot').innerHTML = ''; }
+function readForm(){
+  var o = {};
+  var els = document.querySelectorAll('#modalRoot [name]');
+  for(var i=0;i<els.length;i++){ var el = els[i]; o[el.name] = (el.type === 'checkbox') ? el.checked : el.value; }
+  return o;
+}
+function confirmBox(title, msg, onYes){
+  openModal({ title:title,
+    body:'<div style="font-size:13.5px;line-height:1.7;color:var(--text-2)">'+msg+'</div>',
+    foot:'<button class="btn" data-act="close-modal">取消</button><button class="btn btn-danger" data-act="confirm-yes">确认</button>' });
+  _pendingConfirm = onYes;
+}
+var _pendingConfirm = null;
+var _pendingLessonFb = null;
+var _pendingStrategyLesson = null;
+
+/* 表单片段生成器 */
+function fInput(label, name, val, opt){
+  opt = opt || {};
+  return '<div class="field"'+(opt.half?' data-half="1"':'')+'><label for="field-'+name+'">'+esc(label)+'</label>' +
+    '<input type="'+(opt.type||'text')+'" id="field-'+name+'" name="'+name+'" value="'+esc(val==null?'':val)+'" placeholder="'+esc(opt.ph||'')+'">' +
+    (opt.hint?'<div class="hint">'+esc(opt.hint)+'</div>':'') + '</div>';
+}
+function fSelect(label, name, val, opts, opt){
+  opt = opt || {};
+  var h = '<div class="field"><label for="field-'+name+'">'+esc(label)+'</label><select id="field-'+name+'" name="'+name+'">';
+  h += '<option value="">' + esc(opt.empty || '— 未选择 —') + '</option>';
+  opts.forEach(function(o){
+    var v = (typeof o === 'object') ? o.v : o, t = (typeof o === 'object') ? o.t : o;
+    h += '<option value="'+esc(v)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(t)+'</option>';
+  });
+  h += '</select>' + (opt.hint?'<div class="hint">'+esc(opt.hint)+'</div>':'') + '</div>';
+  return h;
+}
+function fArea(label, name, val, opt){
+  opt = opt || {};
+  return '<div class="field"><label for="field-'+name+'">'+esc(label)+'</label>' +
+    '<textarea id="field-'+name+'" name="'+name+'" rows="'+(opt.rows||3)+'" placeholder="'+esc(opt.ph||'')+'" style="'+(opt.style||'')+'">'+esc(val==null?'':val)+'</textarea>' +
+    (opt.hint?'<div class="hint">'+esc(opt.hint)+'</div>':'') + '</div>';
+}
+function fRow(a, b){ return '<div class="form-row">'+a+b+'</div>'; }
+function fRow3(a, b, c){ return '<div class="form-row-3">'+a+b+c+'</div>'; }
+
+/* ================= 计算层（只读数据，输出派生结果） ================= */
+var state = {
+  view: 'dashboard',
+  selOpp: null,
+  oppFilter: { q:'', status:'', priority:'' },
+  evFilter: { q:'', type:'', strength:'' },
+  tab: { interview:'iv', feedback:'fb', gap:'gap', research:'co' },
+  collapsed: {}
+};
+
+function allOpps(){ return listOf('opportunities'); }
+function activeOpps(){ return allOpps().filter(function(o){ return o.status !== 'Closed' && o.status !== '放弃'; }); }
+
+/* 需要跟进的 Next Action：有 nextAction 且状态未终结 */
+function pendingActions(){
+  return allOpps()
+    .filter(function(o){ return o.nextAction && o.status !== 'Offer' && o.status !== 'Closed' && o.status !== '放弃'; })
+    .map(function(o){ return { opp:o, due:o.nextDue || '', over:isOverdue(o.nextDue) }; })
+    .sort(function(a,b){
+      if(a.over !== b.over) return a.over ? -1 : 1;
+      var da = a.due || '9999', db = b.due || '9999';
+      return da < db ? -1 : (da > db ? 1 : 0);
+    });
+}
+function overdueCount(){ return pendingActions().filter(function(x){ return x.over; }).length; }
+
+function funnelData(){
+  var stages=['已投递','HR沟通','一面','终面','Offer'];
+  var names=['投递','回复','面试','终面','Offer'];
+  return stages.map(function(st,i){return {name:names[i],c:['#3b5bdb','#06aed4','#7a5af8','#6941c6','#12b76a'][i],v:allOpps().filter(function(o){
+    // 完整链队列：每一先行阶段必须有独立证据；不推断跳过的阶段。
+    return stages.slice(0,i+1).every(function(t){return (t==='已投递' && !!o.appliedDate) || o.status===t || (o.statusHistory||[]).some(function(e){return e.status===t;});});
+  }).length};});
+}
+function metrics(){var f=funnelData();return {saved:allOpps().filter(function(o){return o.status==='收藏';}).length,analyzed:allOpps().filter(function(o){return (o.reqs||[]).length;}).length,applied:f[0].v,replied:f[1].v,interview:f[2].v,final:f[3].v,offer:f[4].v,total:allOpps().length};}
+function currentStageText(){
+  var opps = activeOpps();
+  if(!opps.length) return '还没有岗位，先去「岗位与公司库」收集第一批 JD';
+  var byStage = {};
+  opps.forEach(function(o){ byStage[o.status] = (byStage[o.status]||0)+1; });
+  var top = Object.keys(byStage).sort(function(a,b){ return byStage[b]-byStage[a]; })[0];
+  var od = overdueCount();
+  return '当前有 '+opps.length+' 个在推进岗位，最多停在「'+top+'」('+byStage[top]+')' + (od?('，其中 '+od+' 个已逾期'):'，暂无逾期');
+}
+function interviewsOf(oppId){ return listOf('interviews').filter(function(x){ return x.oppId === oppId; }).sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1 : 1; }); }
+function feedbacksOf(oppId){ return listOf('feedbacks').filter(function(x){ return x.oppId === oppId; }).sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1 : 1; }); }
+
+/* ================= 渲染层（只写 DOM，互不调用） ================= */
+function renderNav(){
+  var od = overdueCount();
+  var counts = { opps: allOpps().length, evidence: listOf('evidence').length, interview: listOf('interviews').length,
+                 feedback: listOf('feedbacks').length, gap: listOf('gaps').filter(function(g){return g.status!=='已完成';}).length,
+                 targets: listOf('targets').length, research: listOf('research').length, resume: listOf('resumes').length };
+  var html = '<div class="nav-sec">Pipeline</div>';
+  NAV.forEach(function(n, i){
+    if(i === 1) html += '<div class="nav-sec">Assets</div>';
+    if(i === 5) html += '<div class="nav-sec">Loop</div>';
+    var badge = (n.k === 'dashboard' && od) ? '<span class="nav-badge hot">'+od+'</span>'
+              : (counts[n.k] ? '<span class="nav-badge">'+counts[n.k]+'</span>' : '');
+    html += '<button class="nav-item'+(state.view===n.k?' active':'')+'" data-act="nav" data-view="'+n.k+'">' +
+            ico(n.ic) + '<span>'+esc(n.zh)+'</span>' + badge + '</button>';
+  });
+  document.getElementById('nav').innerHTML = html;
+}
+
+function renderCrumb(){
+  var n = NAV.filter(function(x){ return x.k === state.view; })[0] || NAV[0];
+  document.getElementById('crumbZh').textContent = n.zh;
+  document.getElementById('crumbEn').textContent = n.en;
+}
+
+function renderToday(){
+  var acts = pendingActions();
+  var od = acts.filter(function(x){ return x.over; });
+  var soon = acts.filter(function(x){
+    if(x.over) return false;
+    if(!x.due) return false;
+    var d = diffDays(todayStr(), x.due);
+    return d >= 0 && d <= 3;
+  });
+  var show = od.concat(soon).slice(0, 8);
+  var head = '<div class="today-head">' +
+    '<span class="today-title">'+ico('flag')+'今天要处理</span>' +
+    '<span class="today-count">' + (od.length ? ('<b style="color:var(--danger)">'+od.length+' 项逾期</b> · ') : '') +
+      '未来 3 天 '+soon.length+' 项 · 进行中 '+acts.length+' 项</span></div>';
+
+  if(!show.length){
+    document.getElementById('todayStrip').innerHTML = head + '<div class="today-empty">当前没有逾期或近 3 天到期的下一步行动。去「岗位与公司库」给每个岗位设一个 Next Action + 截止日期。</div>';
+    return;
+  }
+  var body = '<div class="today-list">';
+  show.forEach(function(x){
+    var o = x.opp;
+    body += '<div class="today-card'+(x.over?' overdue':'')+'">' +
+      '<div class="tc-body">' +
+        '<div class="tc-comp">'+esc(o.company)+'</div>' +
+        '<div class="tc-role">'+esc(o.role||'')+(o.priority?(' · '+o.priority):'')+'</div>' +
+        '<div class="tc-act">'+esc(o.nextAction)+'</div>' +
+        '<div class="tc-meta">' +
+          '<span class="chip"'+(x.over?' style="background:var(--danger-weak);color:var(--danger);font-weight:650"':'')+'>'+ico('clock')+esc(dueLabel(x.due))+'</span>' +
+          statusTag(o.status) +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:5px">' +
+        '<button class="btn btn-xs" data-act="open-opp" data-id="'+esc(o.id)+'" title="打开作战页">'+ico('arrow')+'</button>' +
+        '<button class="btn btn-xs" data-act="done-next" data-id="'+esc(o.id)+'" title="标记完成">'+ico('check')+'</button>' +
+      '</div>' +
+    '</div>';
+  });
+  body += '</div>';
+  document.getElementById('todayStrip').innerHTML = head + body;
+}
+
+function renderView(){
+  var c = document.getElementById('content');
+  switch(state.view){
+    case 'case': c.innerHTML = projectCase(); break;
+    case 'dashboard': c.innerHTML = viewDashboard(); break;
+    case 'opps':      c.innerHTML = viewOpps(); break;
+    case 'evidence':  c.innerHTML = viewEvidence(); break;
+    case 'targets':   c.innerHTML = viewTargets(); break;
+    case 'resume':    c.innerHTML = viewResume(); break;
+    case 'interview': c.innerHTML = viewInterview(); break;
+    case 'feedback':  c.innerHTML = viewFeedback(); break;
+    case 'gap':       c.innerHTML = viewGap(); break;
+    case 'research':  c.innerHTML = viewResearch(); break;
+    default:          c.innerHTML = viewDashboard();
+  }
+  window.scrollTo(0,0);
+}
+
+function refreshAll(){
+  renderMode();
+  renderNav();
+  renderCrumb();
+  renderToday();
+  renderView();
+  var chip = document.getElementById('dataChipText');
+  if(chip) chip.textContent = (storageFailed?'保存失败 · ':'本地数据 · ') + allOpps().length + ' 岗位';
+}
+
+/* ================= 求职驾驶舱（V2） ================= */
+function goalCard(){
+  var g = goal();
+  var h = '<div class="goal-card" style="flex:1;min-width:240px">' +
+    '<div style="flex:1;min-width:0">' +
+      '<div class="g-label">OUTCOME GOAL · 求职目标</div>' +
+      '<div class="g-text">'+(g ? esc(g.text) : '还没设置求职目标')+'</div>' +
+      '<div class="g-date">' + (g && g.targetDate
+        ? ('目标日期 '+esc(g.targetDate)+' · 距今 '+diffDays(todayStr(), g.targetDate)+' 天')
+        : '设定一个明确目标，系统才知道该怎么排序你的行动') + '</div>' +
+    '</div>' +
+    '<button class="btn btn-sm" data-act="goal-edit">'+ico('edit')+(g?'修改目标':'设置目标')+'</button>' +
+  '</div>';
+  return h;
+}
+
+function upcomingInterviews(days){
+  var out = [];
+  listOf('interviews').forEach(function(iv){
+    if(!iv.date) return;
+    var d = diffDays(todayStr(), iv.date);
+    if(d >= 0 && d <= days){
+      out.push({ iv:iv, opp:findById('opportunities', iv.oppId), d:d });
+    }
+  });
+  out.sort(function(a,b){ return a.d - b.d; });
+  return out;
+}
+
+function nextBestAction(){
+  var acts = pendingActions();
+  var od = acts.filter(function(x){ return x.over; });
+  if(od.length){
+    var x = od[0];
+    return { title:x.opp.nextAction,
+      reason:'这条已逾期 '+(-diffDays(todayStr(), x.due))+' 天（'+x.opp.company+' · '+x.opp.status+'）。逾期的跟进最容易直接掉链子，先把最老的清掉。',
+      oppId:x.opp.id };
+  }
+  var soon = acts.filter(function(x){ return !x.over && x.due && diffDays(todayStr(), x.due) <= 1; });
+  if(soon.length){
+    var s = soon[0];
+    return { title:s.opp.nextAction,
+      reason:'这是'+(diffDays(todayStr(), s.due) === 0 ? '今天' : '明天')+'到期的事（'+s.opp.company+' · '+s.opp.priority+'）。趁没逾期先做完。',
+      oppId:s.opp.id };
+  }
+  var ivs = upcomingInterviews(4);
+  if(ivs.length){
+    var v = ivs[0];
+    return { title:'准备 '+(v.opp?v.opp.company:'')+' 的 '+(v.iv.round||'面试'),
+      reason:(v.d === 0 ? '面试就在今天' : ('还有 '+v.d+' 天就面试'))+'。面试准备是当下 ROI 最高的事，别把它压到前一晚。',
+      oppId:v.opp ? v.opp.id : null };
+  }
+  var overdueAct = listOf('actions').filter(function(a){ return a.status !== '已完成' && isOverdue(a.due); });
+  if(overdueAct.length){
+    return { title:overdueAct[0].title,
+      reason:'这是个已逾期的能力补强行动（'+(overdueAct[0].priority||'')+'）。缺口不补，投再多也是重复同样的结果。',
+      oppId:overdueAct[0].oppId };
+  }
+  var ready = allOpps().filter(function(o){ return o.status === '待投递' && o.priority === 'P0'; });
+  if(ready.length){
+    return { title:'投递 '+ready[0].company+' · '+(ready[0].role||''),
+      reason:'这个 P0 岗位已经分析完、进入待投递，卡在这里只会让漏斗上游空转。',
+      oppId:ready[0].id };
+  }
+  var noAct = activeOpps().filter(function(o){ return !o.nextAction; });
+  if(noAct.length){
+    return { title:'给「'+noAct[0].company+'」补一个 Next Action',
+      reason:'有岗位停在流程里却没有下一步动作 —— 这是最典型的「悄悄死掉」的岗位。',
+      oppId:noAct[0].id };
+  }
+  var toAnalyze = allOpps().filter(function(o){ return o.status === '收藏' || (o.status === '待分析' && !(o.reqs || []).length); });
+  if(toAnalyze.length){
+    return { title:'拆解「'+toAnalyze[0].company+'」的 JD',
+      reason:'收藏池里还有岗位没分析。不做 JD 拆解，后面匹配、简历、面试全部无从下手。',
+      oppId:toAnalyze[0].id };
+  }
+  return { title:'收集新的目标岗位 JD',
+    reason:'现有流程已经跑顺了。漏斗上游需要补充新的机会。', oppId:null };
+}
+
+function bottleneck(){
+  var fn = funnelData(), worst = null;
+  for(var i = 1; i < fn.length; i++){
+    if(fn[i-1].v >= 2){
+      var r = fn[i].v / fn[i-1].v;
+      if(!worst || r < worst.r) worst = { from:fn[i-1].name, to:fn[i].name, r:Math.round(r*100), loss:fn[i-1].v - fn[i].v };
+    }
+  }
+  var unmatched = 0, oppsWithReq = 0;
+  allOpps().forEach(function(o){
+    if((o.reqs || []).length){
+      oppsWithReq++;
+      o.reqs.forEach(function(r){ if(!(o.matches || []).some(function(m){ return m.reqId === r.id; })) unmatched++; });
+    }
+  });
+  var od = overdueCount();
+  var parts = [];
+  if(fn[0].v>=10 && worst && worst.r < 45) parts.push('漏斗里最窄的一段是「'+worst.from+' → '+worst.to+'」，转化率只有 '+worst.r+'%（损失 '+worst.loss+' 个）。');
+  if(unmatched) parts.push('有 '+unmatched+' 条 JD 要求还没匹配到任何 Evidence。');
+  if(od) parts.push('有 '+od+' 个岗位的 Next Action 已逾期。');
+  if(!parts.length){
+    if(fn[0].v < 5) return { t:'上游机会不足', d:'投递基数还太小（'+fn[0].v+' 个），现在看转化率意义不大。先把目标公司和 JD 收集起来，投出去 10 个以上再谈优化。' };
+    return { t:'当前没有明显卡点', d:'漏斗各环节转化率正常，也没有逾期项。继续保持投递节奏，等样本更多再做判断。' };
+  }
+  var sug = '';
+  if(worst && worst.to === '回复') sug = '建议：先别急着加量投递，回到简历摘要和岗位匹配度上 —— 同样的简历投再多，回复率也不会变。';
+  else if(worst && worst.to === '面试') sug = '建议：回复已经不错但转面试弱，问题多半出在 HR 沟通话术和岗位匹配判断上，把「为什么是我」那一段说具体。';
+  else if(worst && worst.to === '终面') sug = '建议：能进面试但过不了，通常是深度和案例讲得不够。去 Interview Hub 做一版针对性准备。';
+  else if(worst && worst.to === 'Offer') sug = '建议：能走到终面说明能力被认可，卡在最后多半是薪资预期或动机表达，提前想清楚你的底线和说法。';
+  else sug = '建议：按「Next Best Action」先清掉最紧急的一项，再回头补 Evidence 匹配。';
+  return { t: parts[0].replace(/^/, '').slice(0, 40), d: parts.join('') + '\n' + sug };
+}
+
+function upcomingActions(){
+  var acts = pendingActions();
+  var today = [], soon = [], waiting = [], ivs = upcomingInterviews(7);
+  acts.forEach(function(x){
+    if(x.over || (x.due && diffDays(todayStr(), x.due) === 0)) today.push(x);
+    else if(x.due && diffDays(todayStr(), x.due) <= 7) soon.push(x);
+  });
+  allOpps().forEach(function(o){
+    var si = stageIdx(o.status);
+    if(si >= 3 && si <= 4 && o.appliedDate && diffDays(o.appliedDate, todayStr()) >= 7 && !o.nextAction){
+      waiting.push({ opp:o, reason:'投递已 '+diffDays(o.appliedDate, todayStr())+' 天无进展' });
+    }
+  });
+  listOf('contacts').forEach(function(c){
+    if(c.nextFollowup && diffDays(todayStr(), c.nextFollowup) <= 3){
+      waiting.push({ opp:findById('opportunities', c.oppId), reason:c.name+' · 约定跟进 '+cnDate(c.nextFollowup), contact:c });
+    }
+  });
+
+  var h = '';
+  h += '<div class="up-grp"><div class="up-title'+(today.length?' hot':'')+'">'+ico('alert')+'今天需要完成<span class="n">'+today.length+'</span></div>';
+  h += today.length ? today.map(function(x){
+      return '<div class="up-row"><div style="flex:1;min-width:0"><div class="t">'+esc(x.opp.nextAction)+'</div>' +
+        '<div class="s">'+esc(x.opp.company)+(x.opp.role?(' · '+esc(x.opp.role)):'')+' · '+esc(dueLabel(x.due))+'</div></div>' +
+        '<button class="btn btn-xs" data-act="open-opp" data-id="'+x.opp.id+'">去处理'+ico('arrow')+'</button></div>';
+    }).join('') : '<div class="s muted" style="padding:4px 0;font-size:12px">今天没有到期事项</div>';
+  h += '</div>';
+
+  h += '<div class="up-grp"><div class="up-title">'+ico('clock')+'即将截止（7 天内）<span class="n">'+soon.length+'</span></div>';
+  h += soon.length ? soon.slice(0,6).map(function(x){
+      return '<div class="up-row"><div style="flex:1;min-width:0"><div class="t">'+esc(x.opp.nextAction)+'</div>' +
+        '<div class="s">'+esc(x.opp.company)+' · '+esc(cnDate(x.due))+'</div></div>' +
+        '<button class="btn btn-xs" data-act="open-opp" data-id="'+x.opp.id+'">'+ico('arrow')+'</button></div>';
+    }).join('') : '<div class="s muted" style="padding:4px 0;font-size:12px">无</div>';
+  h += '</div>';
+
+  h += '<div class="up-grp"><div class="up-title">'+ico('inbox')+'等待 Follow-up<span class="n">'+waiting.length+'</span></div>';
+  h += waiting.length ? waiting.slice(0,6).map(function(w){
+      return '<div class="up-row"><div style="flex:1;min-width:0"><div class="t">'+esc(w.reason)+'</div>' +
+        '<div class="s">'+esc(w.opp?w.opp.company:'')+(w.opp&&w.opp.role?(' · '+esc(w.opp.role)):'')+'</div></div>' +
+        (w.opp?'<button class="btn btn-xs" data-act="open-opp" data-id="'+w.opp.id+'">'+ico('arrow')+'</button>':'')+'</div>';
+    }).join('') : '<div class="s muted" style="padding:4px 0;font-size:12px">无</div>';
+  h += '</div>';
+
+  h += '<div class="up-grp"><div class="up-title">'+ico('users')+'即将面试（7 天内）<span class="n">'+ivs.length+'</span></div>';
+  h += ivs.length ? ivs.map(function(v){
+      return '<div class="up-row"><div style="flex:1;min-width:0"><div class="t">'+esc(v.iv.round||'面试')+' · '+esc(v.opp?v.opp.company:'')+'</div>' +
+        '<div class="s">'+esc(cnDate(v.iv.date))+' · '+(v.d === 0 ? '就是今天' : ('还有 '+v.d+' 天'))+(v.iv.interviewer?(' · '+esc(v.iv.interviewer)):'')+'</div></div>' +
+        (v.opp?'<button class="btn btn-xs" data-act="open-opp" data-id="'+v.opp.id+'">准备'+ico('arrow')+'</button>':'')+'</div>';
+    }).join('') : '<div class="s muted" style="padding:4px 0;font-size:12px">近 7 天没有已排期的面试</div>';
+  h += '</div>';
+  return h;
+}
+
+function viewDashboard(){
+  var m = metrics(), fn = funnelData(), acts = pendingActions(), nb = nextBestAction(), bn = bottleneck();
+  var h = '';
+
+  if(m.total >= 30){
+    h += '<div class="backup-tip">'+ico('alert')+'<span>数据已积累 '+m.total+' 条岗位，建议导出一次 JSON 备份。</span>' +
+         '<button class="btn btn-sm" data-act="export-json">立即导出</button></div>';
+  }
+
+  h += '<div class="h-page"><div><h1 class="h-title">求职驾驶舱</h1>' +
+       '<div class="h-desc">'+esc(currentStageText())+'</div></div>' +
+       '<div style="margin-left:auto;display:flex;gap:6px">' + copilotBtn('next','','Copilot 判断下一步') + '</div></div>';
+
+  /* 指标 */
+  h += '<div class="grid grid-4" style="margin-bottom:12px">' +
+    metricCard('收藏岗位','待启动 JD 池', m.saved, '', 'inbox') +
+    metricCard('已分析','已拆解 JD 要求', m.analyzed, 'accent-b', 'search') +
+    metricCard('已投递','已投出', m.applied, 'accent-b', 'arrow') +
+    metricCard('HR 回复','进入沟通', m.replied, 'accent-c', 'users') +
+    metricCard('面试','进入面试环节', m.interview, 'accent-p', 'star') +
+    metricCard('终面','走到最后', m.final, 'accent-p', 'flag') +
+    metricCard('Offer','最终收获', m.offer, 'accent-g', 'check') +
+  '</div>';
+
+  /* Next Best Action —— 最突出 */
+  h += '<div class="nba" style="margin-bottom:12px">' +
+    '<div class="nba-label">'+ico('flag')+'NEXT BEST ACTION · 现在最值得做的一件事</div>' +
+    '<div class="nba-title">'+esc(nb.title)+'</div>' +
+    '<div class="nba-reason">'+esc(nb.reason)+'</div>' +
+    '<div class="nba-acts">' +
+      (nb.oppId ? '<button class="btn btn-primary btn-sm" data-act="open-opp" data-id="'+nb.oppId+'">'+ico('arrow')+'立刻去处理</button>' : '<button class="btn btn-primary btn-sm" data-act="opp-new">'+ico('plus')+'新建岗位</button>') +
+      '<button class="btn btn-sm" data-act="nav" data-view="opps">'+ico('briefcase')+'看全部岗位</button>' +
+    '</div></div>';
+
+  /* 目标 + 瓶颈 */
+  h += '<div class="grid grid-2" style="margin-bottom:12px">' + goalCard() +
+    '<div class="bottleneck"><div class="b-t">'+ico('trending')+'CURRENT BOTTLENECK · 当前瓶颈</div>' +
+    '<div class="b-d">'+esc(bn.d).replace(/\n/g,'<br>')+'</div></div>' +
+  '</div>';
+
+  /* 漏斗 + 即将行动 */
+  var max = 1; fn.forEach(function(f){ if(f.v > max) max = f.v; });
+  h += '<div class="grid grid-2">' +
+    '<div>' +
+      '<div class="card" style="margin-bottom:12px"><div class="card-head"><h3>有记录的完整阶段漏斗</h3>' +
+        '<span class="sub">逐阶段有记录才计入；分母为前一阶段；少于10份不显示转化率</span></div><div class="card-pad"><div class="funnel">';
+  fn.forEach(function(f, i){
+    var pct = Math.max(f.v>0?6:0, Math.round(f.v / max * 100));
+    var prev = i>0 ? fn[i-1].v : f.v;
+    var rate = i>0 ? (prev ? Math.round(f.v/prev*100) : 0) : 100;
+    h += '<div class="fn-row"><div class="fn-name">'+f.name+'</div>' +
+         '<div class="fn-bar-wrap"><div class="fn-bar" style="width:'+pct+'%;background:'+f.c+'">'+f.v+'</div></div>' +
+         '<div class="fn-rate">'+(i>0 ? (prev<10?'样本不足':('转化 '+rate+'%')) : '基数')+'</div></div>';
+  });
+  h += '</div></div></div>' +
+      '<div class="card"><div class="card-head"><h3>岗位状态分布</h3></div><div class="card-pad">' + statusDist() + '</div></div>' +
+    '</div>' +
+    '<div class="card"><div class="card-head"><h3>Upcoming Actions</h3>' +
+      '<span class="sub">今天 / 将到期 / 待跟进 / 将面试</span>' +
+      '<div class="right"><span class="chip">进行中 '+acts.length+' 项</span></div></div>' +
+      '<div class="card-pad">' + upcomingActions() + '</div></div>' +
+  '</div>';
+
+  return h;
+}
+
+function metricCard(label, foot, val, accent, icon){
+  return '<div class="card metric '+(accent||'')+'">' +
+    '<div class="metric-label">'+ico(icon)+esc(label)+'</div>' +
+    '<div class="metric-val">'+val+'</div>' +
+    '<div class="metric-foot">'+esc(foot)+'</div></div>';
+}
+
+function statusDist(){
+  var opps = allOpps();
+  if(!opps.length) return '<div class="today-empty">暂无数据</div>';
+  var buckets = {};
+  opps.forEach(function(o){ buckets[o.status] = (buckets[o.status]||0)+1; });
+  var max = 1; Object.keys(buckets).forEach(function(k){ if(buckets[k] > max) max = buckets[k]; });
+  var h = '<div class="funnel">';
+  STATUS_ALL.forEach(function(s){
+    if(!buckets[s]) return;
+    var c = STATUS_COLOR[s];
+    h += '<div class="fn-row"><div class="fn-name" style="width:70px;flex:0 0 70px">'+s+'</div>' +
+         '<div class="fn-bar-wrap"><div class="fn-bar" style="width:'+Math.round(buckets[s]/max*100)+'%;background:'+c+'">'+buckets[s]+'</div></div></div>';
+  });
+  return h + '</div>';
+}
+
+function weekTasks(){
+  var acts = pendingActions().filter(function(x){
+    if(!x.due) return false;
+    var d = diffDays(todayStr(), x.due);
+    return d <= 7;
+  });
+  if(!acts.length) return '<div class="empty" style="padding:26px 20px">'+ico('check')+'<p>未来 7 天没有到期任务</p></div>';
+  var h = '<div>';
+  acts.forEach(function(x){
+    var o = x.opp;
+    h += '<div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center">' +
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(o.company)+'</div>' +
+      '<div style="font-size:12.5px;color:var(--text-2)">'+esc(o.nextAction)+'</div></div>' +
+      '<span class="chip"'+(x.over?' style="background:var(--danger-weak);color:var(--danger);font-weight:650"':'')+'>'+esc(cnDate(x.due))+'</span>' +
+    '</div>';
+  });
+  return h + '</div>';
+}
+
+/* ================= 统一的板块折叠 ================= */
+function secToggle(key, num, title, sub, body){
+  var collapsed = state.collapsed[key] ? ' collapsed' : '';
+  return '<div class="sec'+collapsed+'" data-sec="'+key+'">' +
+    '<div class="sec-head" data-act="toggle-sec" data-key="'+key+'">' +
+      '<span class="sec-num">'+num+'</span><span class="sec-title">'+esc(title)+'</span>' +
+      (sub ? '<span class="sec-sub">'+esc(sub)+'</span>' : '') +
+      ico('chev','chev') +
+    '</div><div class="sec-body">'+body+'</div></div>';
+}
+
+
+/* =========================================================
+   模块 1：Opportunities —— 岗位与公司库（系统核心对象）
+   ========================================================= */
+function filteredOpps(){
+  var f = state.oppFilter, q = (f.q||'').toLowerCase();
+  return allOpps().filter(function(o){
+    if(f.status && o.status !== f.status) return false;
+    if(f.priority && o.priority !== f.priority) return false;
+    if(q){
+      var s = ((o.company||'')+' '+(o.role||'')+' '+(o.direction||'')+' '+(o.city||'')+' '+(o.jd||'')).toLowerCase();
+      if(s.indexOf(q) < 0) return false;
+    }
+    return true;
+  }).sort(function(a,b){
+    var pa = PRIORITIES.indexOf(a.priority), pb = PRIORITIES.indexOf(b.priority);
+    if(pa !== pb) return (pa<0?9:pa) - (pb<0?9:pb);
+    return (b.updatedAt||'') < (a.updatedAt||'') ? -1 : 1;
+  });
+}
+
+function viewOpps(){
+  var h = '<div class="h-page"><div><h1 class="h-title">岗位与公司库</h1>' +
+    '<div class="h-desc">每个岗位都必须有：Status + Next Action + Deadline</div></div>' +
+    '<div style="margin-left:auto"><button class="btn btn-primary" data-act="opp-new">'+ico('plus')+'新建岗位</button></div></div>';
+
+  h += '<div class="split'+(state.selOpp?' has-detail':'')+'">';
+  /* --- 左：列表 --- */
+  h += '<div class="list-panel"><div class="list-tools">' +
+    '<div class="search-wrap">'+ico('search')+'<input type="text" id="oppQ" data-chg="opp-q" value="'+esc(state.oppFilter.q)+'" placeholder="搜索公司 / 岗位 / JD"></div>' +
+    '<div class="filters">' +
+      '<select data-chg="opp-filter" data-f="status"><option value="">全部状态</option>' +
+        STATUS_ALL.map(function(s){ return '<option value="'+esc(s)+'"'+(state.oppFilter.status===s?' selected':'')+'>'+esc(s)+'</option>'; }).join('') +
+      '</select>' +
+      '<select data-chg="opp-filter" data-f="priority"><option value="">全部优先级</option>' +
+        PRIORITIES.map(function(s){ return '<option value="'+esc(s)+'"'+(state.oppFilter.priority===s?' selected':'')+'>'+esc(s)+'</option>'; }).join('') +
+      '</select>' +
+    '</div></div><div class="list-scroll">';
+  var list = filteredOpps();
+  if(!list.length){ h += '<div class="empty" style="padding:28px 16px">'+ico('inbox')+'<p>没有符合条件的岗位</p></div>'; }
+  list.forEach(function(o){
+    var od = isOverdue(o.nextDue) && o.nextAction;
+    h += '<div class="opp-item'+(state.selOpp===o.id?' active':'')+'" data-act="open-opp" data-id="'+esc(o.id)+'">' +
+      '<div class="opp-top"><div style="flex:1;min-width:0">' +
+        '<div class="opp-co">'+esc(o.company)+'</div>' +
+        '<div class="opp-role">'+esc(o.role||'未填岗位')+'</div>' +
+      '</div>' + prioTag(o.priority) + '</div>' +
+      '<div class="opp-meta">'+statusTag(o.status)+
+        (o.city?'<span class="chip">'+esc(o.city)+'</span>':'')+
+        (o.salary?'<span class="chip">'+esc(o.salary)+'</span>':'')+'</div>' +
+      (o.nextAction
+        ? '<div class="opp-next'+(od?' od':'')+'">'+ico('clock')+'<span>'+esc(o.nextAction)+(o.nextDue?(' · '+dueLabel(o.nextDue)):'')+'</span></div>'
+        : '<div class="opp-next" style="color:var(--danger)">'+ico('alert')+'<span>缺少 Next Action</span></div>') +
+    '</div>';
+  });
+  h += '</div></div>';
+
+  /* --- 右：单岗位作战页 --- */
+  h += '<div class="detail-panel">' + oppDetail() + '</div>';
+  h += '</div>';
+  return h;
+}
+
+function oppDetail(){
+  if(!state.selOpp){
+    return '<div class="card"><div class="empty">'+ico('briefcase')+
+      '<p>从左侧选择一个岗位，右侧会展开它的完整作战页</p>' +
+      '<button class="btn btn-primary" data-act="opp-new">'+ico('plus')+'新建岗位</button></div></div>';
+  }
+  var o = findById('opportunities', state.selOpp);
+  if(!o){ state.selOpp = null; return '<div class="card"><div class="empty">'+ico('inbox')+'<p>岗位不存在或已被删除</p></div></div>'; }
+
+  var h = '';
+  /* 头部 */
+  h += '<div class="card" style="padding:14px 16px;margin-bottom:12px">' +
+    '<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">' +
+      '<button class="btn btn-sm mobile-only" data-act="back-list">返回列表</button>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:18px;font-weight:730;letter-spacing:-.2px">'+esc(o.company)+'</div>' +
+        '<div style="font-size:13.5px;color:var(--text-2);margin-top:1px">'+esc(o.role||'')+(o.direction?(' · '+esc(o.direction)):'')+'</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' +
+        '<select data-chg="set-status" data-id="'+esc(o.id)+'" style="width:auto;min-height:34px;padding:5px 8px;font-weight:600">' +
+          STATUS_ALL.map(function(s){ return '<option value="'+esc(s)+'"'+(o.status===s?' selected':'')+'>'+esc(s)+'</option>'; }).join('') +
+        '</select>' +
+        '<select data-chg="set-priority" data-id="'+esc(o.id)+'" style="width:auto;min-height:34px;padding:5px 8px">' +
+          '<option value="">优先级</option>' + PRIORITIES.map(function(s){ return '<option value="'+esc(s)+'"'+(o.priority===s?' selected':'')+'>'+esc(s)+'</option>'; }).join('') +
+        '</select>' +
+        '<button class="btn btn-sm" data-act="opp-edit" data-id="'+esc(o.id)+'">'+ico('edit')+'编辑</button>' +
+        '<button class="btn btn-sm btn-danger" data-act="opp-del" data-id="'+esc(o.id)+'">'+ico('trash')+'</button>' +
+      '</div>' +
+    '</div>' +
+    nextActionBox(o) +
+  '</div>';
+
+  /* 1 基本信息 */
+  var co = null;
+  listOf('research').forEach(function(r){ if(r.type === '公司' && r.company === o.company) co = r; });
+  var kv = [
+    ['岗位方向', o.direction], ['城市', co ? (o.city || co.city) : o.city], ['薪资', o.salary],
+    ['来源', o.source], ['投递日期', o.appliedDate ? cnDate(o.appliedDate) : ''],
+    ['使用简历', o.resumeVersion], ['创建于', o.createdAt],
+    ['行业', co ? co.industry : ''], ['公司 Research', co ? '已建档' : '未建档']
+  ];
+  var kvHtml = '<div class="kv">' + kv.map(function(p){
+    return '<div class="kv-item"><div class="k">'+esc(p[0])+'</div><div class="v">'+esc(p[1]||'—')+'</div></div>';
+  }).join('') + '</div>';
+  if(co){
+    kvHtml += '<div class="market-path"><span>'+esc(co.city||'城市未填')+'</span><em>›</em><span>'+esc(co.industry||'行业未填')+
+      '</span><em>›</em><span>'+esc(co.company)+'</span><em>›</em><span>'+esc(co.business||'业务未填')+'</span>' +
+      (co.targetDept?('<em>›</em><span>'+esc(co.targetDept)+'</span>'):'') +
+      (co.targetRole?('<em>›</em><span>'+esc(co.targetRole)+'</span>'):'')+'</div>';
+  }
+  kvHtml += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">' +
+    '<button class="btn btn-xs" data-act="nav" data-view="research">'+ico('book')+'查看/建立公司档案</button></div>';
+  h += secToggle(o.id+'_s1', 1, '岗位基本信息 & Company', '', kvHtml);
+
+  /* 2 JD 原文 */
+  h += secToggle(o.id+'_s2', 2, 'JD 原文', (o.jd?o.jd.length+' 字':''),
+    '<div class="jd-box">'+(o.jd ? esc(o.jd) : '<span class="muted">还没有粘贴 JD 原文。点下面按钮把招聘启事原文贴进来，后续拆解与匹配都基于它。</span>')+'</div>' +
+    '<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button class="btn btn-sm" data-act="edit-jd" data-id="'+esc(o.id)+'">'+ico('edit')+'编辑 JD 原文</button>' +
+      (o.jd ? copilotBtn('jd', o.id, 'Copilot 拆解这份 JD') : '') +
+    '</div>');
+
+  /* 3 JD Analysis */
+  h += secToggle(o.id+'_s3', 3, 'JD Analysis · 要求拆解', (o.reqs||[]).length+' 条要求', jdAnalysisSection(o));
+
+  /* 4 匹配 */
+  h += secToggle(o.id+'_s4', 4, 'Evidence Match · 证据匹配', (o.matches||[]).length+' 条匹配', matchSection(o));
+
+  /* 5 Gap Analysis */
+  h += secToggle(o.id+'_s5', 5, 'Gap Analysis · 缺口分析', gapsOfOpp(o.id).length+' 个缺口', gapAnalysisSection(o));
+
+  /* 6 简历版本 */
+  h += secToggle(o.id+'_s6', 6, 'Resume Version · 使用简历', '', resumeSection(o));
+
+  /* 7 联系人 */
+  h += secToggle(o.id+'_s7', 7, 'Contact / Referral · 联系人', contactsOf(o.id).length+' 人', contactSection(o));
+
+  /* 8 投递记录 */
+  h += secToggle(o.id+'_s8', 8, 'Application Record · 投递记录', '', applySection(o));
+
+  /* 9 面试记录 */
+  var ivs = interviewsOf(o.id);
+  h += secToggle(o.id+'_s9', 9, 'Interview Record · 面试与复盘', ivs.length+' 场', interviewSection(o, ivs));
+
+  /* 10 反馈与 Lesson */
+  var fbs = feedbacksOf(o.id);
+  h += secToggle(o.id+'_s10', 10, 'Feedback & Lesson · 反馈复盘', fbs.length+' 条', feedbackSection(o, fbs));
+
+  /* 11 下一步行动 + 最终结果 */
+  h += secToggle(o.id+'_s11', 11, 'Next Action & Final Result', '', nextActionEditor(o) +
+    '<div class="divider"></div>' +
+    fArea('最终结果 / Final Result','result',o.result,{rows:2,ph:'Offer 条件 / 拒信原因 / 放弃理由'}) +
+    '<div style="margin-top:8px"><button class="btn btn-primary btn-sm" data-act="result-save" data-id="'+esc(o.id)+'">'+ico('check')+'保存最终结果</button></div>');
+
+  return h;
+}
+
+/* JD Analysis：关键词 + 判断 + 风险 + 要求拆解 */
+function jdAnalysisSection(o){
+  var a = o.analysis || {}, reqs = o.reqs || [];
+  var h = '<div class="form-row-3">' +
+    '<div class="field"><label>关键词（逗号分隔）</label><input type="text" id="an_kw_'+esc(o.id)+'" value="'+esc(a.keywords||'')+'" placeholder="医学影像, Python, 注册"></div>' +
+    '<div class="field"><label>我的判断</label><select id="an_vd_'+esc(o.id)+'"><option value="">—</option>' +
+      RES_VERDICTS.map(function(v){ return '<option value="'+esc(v)+'"'+(a.verdict===v?' selected':'')+'>'+esc(v)+'</option>'; }).join('') +
+    '</select></div>' +
+    '<div class="field"><label>&nbsp;</label><button class="btn btn-sm btn-full" data-act="analysis-save" data-id="'+esc(o.id)+'">'+ico('check')+'保存分析</button></div>' +
+  '</div>';
+  h += '<div class="field"><label>风险点 / 会被挑战的地方</label>' +
+    '<textarea id="an_nt_'+esc(o.id)+'" rows="2" placeholder="例：我没有注册经验；产品年限可能被质疑">'+esc(a.notes||'')+'</textarea></div>';
+  if(a.keywords){
+    h += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">' +
+      String(a.keywords).split(/[,，]/).map(function(k){ return k.trim() ? '<span class="chip">'+esc(k.trim())+'</span>' : ''; }).join('') + '</div>';
+  }
+  if(a.verdict) h += '<div style="margin-bottom:8px">'+tag(a.verdict, a.verdict==='不匹配'?'#f04438':(a.verdict==='值得投'||a.verdict==='强烈推荐'?'#12b76a':'#f79009'))+'</div>';
+
+  h += '<div class="divider"></div><div class="chain" style="margin-bottom:8px">' +
+    '<i class="hi">JD Requirement</i><span class="ar">→</span><i>Evidence</i><span class="ar">→</span><i>Resume Bullet</i><span class="ar">→</span><i>Interview Story</i></div>';
+
+  h += reqs.length ? '<div>' + reqs.map(function(r){
+      return '<div class="req-row"><div class="req-main"><div class="req-text">'+esc(r.text)+'</div>' +
+        (r.note?'<div class="req-note">'+esc(r.note)+'</div>':'')+'</div>' +
+        '<span class="chip">'+esc(r.level||'要求')+'</span>' +
+        '<button class="btn btn-xs" data-act="req-edit" data-id="'+esc(o.id)+'" data-rid="'+esc(r.id)+'">'+ico('edit')+'</button>' +
+        '<button class="btn btn-xs btn-danger" data-act="req-del" data-id="'+esc(o.id)+'" data-rid="'+esc(r.id)+'">'+ico('trash')+'</button></div>';
+    }).join('') + '</div>'
+    : '<div class="today-empty">还没拆解。把 JD 拆成 3-8 条具体要求（必备 / 加分），后面才能逐条匹配证据。</div>';
+
+  h += '<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">' +
+    '<button class="btn btn-sm" data-act="req-add" data-id="'+esc(o.id)+'">'+ico('plus')+'添加要求</button>' +
+    (o.jd ? '<button class="btn btn-sm" data-act="req-bulk" data-id="'+esc(o.id)+'">'+ico('copy')+'从 JD 按行批量导入</button>' : '') +
+    (o.jd ? copilotBtn('jd', o.id, 'Copilot 拆解 JD') : '') +
+  '</div>';
+  return h;
+}
+
+/* Gap Analysis：本岗位缺口 + 未匹配要求 */
+function gapAnalysisSection(o){
+  var un = (o.reqs || []).filter(function(r){ return !(o.matches || []).some(function(m){ return m.reqId === r.id; }); });
+  var gs = gapsOfOpp(o.id);
+  var h = '';
+  if(un.length){
+    h += '<div style="font-size:11px;font-weight:720;color:var(--text-3);margin-bottom:6px">未匹配的 JD 要求（'+un.length+'）→ 缺口候选</div>';
+    h += un.map(function(r){
+      return '<div class="req-row"><div class="req-main"><div class="req-text">'+esc(r.text)+'</div>' +
+        '<div class="req-note">判断缺口类型后再补，不要一上来就认定自己不行</div></div>' +
+        '<button class="btn btn-xs" data-act="gap-from-req" data-id="'+esc(o.id)+'" data-rid="'+esc(r.id)+'">'+ico('arrow')+'建为缺口</button></div>';
+    }).join('');
+    h += '<div style="margin:8px 0">' + copilotBtn('gap', o.id, 'Copilot 识别缺口类型') + '</div><div class="divider"></div>';
+  }
+  if(gs.length){
+    h += gs.map(function(g){
+      var as = actionsOf(g.id);
+      return '<div class="sub-card"><div class="sc-t">'+esc(g.title)+'</div>' +
+        '<div class="sc-m" style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">' +
+          gapTypeTag(g.gapType) + severityTag(g.severity) + statusTag2(g.status||'待开始') +
+          (g.due?'<span class="chip">'+ico('clock')+esc(dueLabel(g.due))+'</span>':'') + '</div>' +
+        (as.length ? '<div style="margin-top:7px">' + as.map(function(a){
+            return '<div class="act-row"><span class="chip">'+esc(a.status||'待开始')+'</span>' +
+              '<span class="a-t">'+esc(a.title)+'</span>' +
+              (a.due?'<span class="chip">'+esc(cnDate(a.due))+'</span>':'') + '</div>';
+          }).join('') + '</div>' : '<div class="sc-m" style="color:var(--danger);margin-top:6px">还没有对应 Action —— 每个 Gap 至少要有一个行动</div>') +
+        '<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">' +
+          '<button class="btn btn-xs" data-act="action-add" data-gap="'+esc(g.id)+'" data-opp="'+esc(o.id)+'">'+ico('plus')+'加 Action</button>' +
+          '<button class="btn btn-xs" data-act="nav" data-view="gap">'+ico('arrow')+'去 Gap & Action</button>' +
+        '</div></div>';
+    }).join('');
+  } else if(!un.length){
+    h += '<div class="today-empty">这个岗位目前没有识别到缺口。</div>';
+  }
+  h += '<div style="margin-top:8px"><button class="btn btn-sm" data-act="gap-add-opp" data-id="'+esc(o.id)+'">'+ico('plus')+'手动添加缺口</button></div>';
+  return h;
+}
+
+/* 联系人 */
+function contactSection(o){
+  var cs = contactsOf(o.id);
+  var h = cs.length ? cs.map(function(c){
+    var od = isOverdue(c.nextFollowup);
+    return '<div class="sub-card"><div style="display:flex;gap:8px;align-items:flex-start">' +
+      '<div style="flex:1;min-width:0"><div class="sc-t">'+esc(c.name)+(c.title?(' <span class="muted" style="font-weight:400">· '+esc(c.title)+'</span>'):'')+'</div>' +
+      '<div class="sc-m">'+esc(c.type||'')+(c.contactInfo?(' · '+esc(c.contactInfo)):'')+(c.relation?(' · '+esc(c.relation)):'')+'</div>' +
+      '<div class="sc-m" style="margin-top:3px">最近联系 '+(c.lastContact?esc(cnDate(c.lastContact)):'未记录')+
+        (c.nextFollowup?(' · 下次跟进 <b style="color:'+(od?'var(--danger)':'var(--text-2)')+'">'+esc(cnDate(c.nextFollowup))+'</b>'):'')+'</div></div>' +
+      '<button class="btn btn-xs" data-act="ct-edit" data-id="'+esc(c.id)+'">'+ico('edit')+'</button>' +
+      '<button class="btn btn-xs btn-danger" data-act="ct-del" data-id="'+esc(c.id)+'">'+ico('trash')+'</button>' +
+    '</div></div>';
+  }).join('') : '<div class="today-empty">还没有联系人。内推和 HR 关系的价值在于「跟进」，记下来才不会断。</div>';
+  h += '<div style="margin-top:8px"><button class="btn btn-sm" data-act="ct-add" data-opp="'+esc(o.id)+'">'+ico('plus')+'添加联系人</button></div>';
+  return h;
+}
+
+function nextActionBox(o){
+  var od = isOverdue(o.nextDue) && o.nextAction;
+  var has = !!o.nextAction;
+  return '<div class="next-box'+(od?' od':'')+'" style="margin-top:12px">' +
+    '<div class="next-label">NEXT ACTION · 下一步行动</div>' +
+    (has ? '<div class="next-act">'+esc(o.nextAction)+'</div>' : '<div class="next-act" style="color:var(--danger)">⚠ 这个岗位还没有 Next Action</div>') +
+    '<div class="next-due'+(od?' od':'')+'">' + ico('clock') +
+      '<span>'+(o.nextDue ? (cnDate(o.nextDue)+' · '+dueLabel(o.nextDue)) : '未设截止日期')+'</span>' +
+      '<span style="margin-left:auto;display:flex;gap:6px">' +
+        '<button class="btn btn-xs" data-act="next-edit" data-id="'+esc(o.id)+'">'+ico('edit')+'编辑</button>' +
+        (has?'<button class="btn btn-xs btn-primary" data-act="done-next" data-id="'+esc(o.id)+'">'+ico('check')+'标记完成</button>':'') +
+      '</span>' +
+    '</div></div>';
+}
+
+function nextActionEditor(o){
+  return '<div class="field"><label>下一步要做什么（一句话，可执行）</label>' +
+    '<textarea name="na_act" id="na_act" rows="2" placeholder="例：把 V3 简历摘要改成 RWS 方向并投递">'+esc(o.nextAction||'')+'</textarea></div>' +
+    '<div class="form-row"><div class="field"><label>截止日期</label>' +
+    '<input type="date" name="na_due" id="na_due" value="'+esc(o.nextDue||'')+'"></div>' +
+    '<div class="field"><label>快捷设置</label><div style="display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button class="btn btn-xs" data-act="set-due" data-id="'+esc(o.id)+'" data-d="0">今天</button>' +
+      '<button class="btn btn-xs" data-act="set-due" data-id="'+esc(o.id)+'" data-d="1">明天</button>' +
+      '<button class="btn btn-xs" data-act="set-due" data-id="'+esc(o.id)+'" data-d="3">3天后</button>' +
+      '<button class="btn btn-xs" data-act="set-due" data-id="'+esc(o.id)+'" data-d="7">一周后</button>' +
+    '</div></div></div>' +
+    '<button class="btn btn-primary btn-sm" data-act="next-save" data-id="'+esc(o.id)+'">'+ico('check')+'保存 Next Action</button>';
+}
+
+function matchSection(o){
+  var reqs = o.reqs || [], ms = o.matches || [], evs = listOf('evidence');
+  if(!reqs.length) return '<div class="today-empty">先在「JD 要求拆解」里添加要求，再逐条挂上你的 Evidence。</div>';
+  var h = '<div class="match-grid">';
+  reqs.forEach(function(r){
+    var mine = ms.filter(function(m){ return m.reqId === r.id; });
+    h += '<div class="match-row"><div class="match-top">' +
+      '<span class="chip" style="background:'+(r.level==='加分'?'var(--surface-3)':'var(--primary-weak)')+';color:'+(r.level==='加分'?'var(--text-2)':'var(--primary-strong)')+'">'+esc(r.level||'要求')+'</span>' +
+      '<span class="match-req">'+esc(r.text)+'</span>' +
+      (mine.length ? '' : '<button class="btn btn-xs" data-act="match-add" data-id="'+esc(o.id)+'" data-rid="'+esc(r.id)+'">'+ico('plus')+'匹配证据</button>') +
+    '</div>';
+    if(!mine.length){
+      h += '<div class="match-ev" style="color:var(--danger)">未匹配 —— 这是你的能力缺口候选，可一键转入「能力缺口与行动」</div>' +
+           '<div style="margin-top:6px"><button class="btn btn-xs" data-act="gap-from-req" data-id="'+esc(o.id)+'" data-rid="'+esc(r.id)+'">'+ico('arrow')+'转为能力缺口</button></div>';
+    } else {
+      mine.forEach(function(m){
+        var ev = evs.filter(function(e){ return e.id === m.evId; })[0];
+        var sc = m.strength==='强'?'s-strong':(m.strength==='中'?'s-mid':'s-weak');
+        h += '<div class="match-ev"><span class="arrow-ico" style="display:inline-block;width:13px;height:13px;stroke:var(--primary);fill:none;stroke-width:2.4">'+ico('arrow')+'</span>' +
+          '<span style="flex:1;min-width:0"><b style="font-weight:650">'+(ev?esc(ev.name):'（证据已删除）')+'</b>' +
+          (ev && ev.strength ? ' '+strengthTag2(ev.strength) : '') +
+          (m.note?'<span class="muted"> — '+esc(m.note)+'</span>':'')+'</span>' +
+          '<span class="strength '+sc+'">'+esc(m.strength||'中')+'</span>' +
+          '<button class="btn btn-xs" data-act="match-edit" data-id="'+esc(o.id)+'" data-mid="'+esc(m.id)+'">'+ico('edit')+'</button>' +
+          '<button class="btn btn-xs btn-danger" data-act="match-del" data-id="'+esc(o.id)+'" data-mid="'+esc(m.id)+'">'+ico('trash')+'</button></div>';
+      });
+    }
+    h += '</div>';
+  });
+  h += '</div>';
+  h += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">' +
+    (ms.length ? '<button class="btn btn-sm" data-act="copy-match" data-id="'+esc(o.id)+'">'+ico('copy')+'复制证据摘要</button>' : '') +
+    copilotBtn('match', o.id, 'Copilot 找匹配证据') +
+  '</div>';
+  return h;
+}
+
+function resumeSection(o){
+  var rs = listOf('resumes');
+  var h = '<div class="field"><label>该岗位使用的简历版本</label>' +
+    '<select data-chg="set-resume" data-id="'+esc(o.id)+'"><option value="">— 未指定 —</option>' +
+    rs.map(function(r){ return '<option value="'+esc(r.name)+'"'+(o.resumeVersion===r.name?' selected':'')+'>'+esc(r.name)+(r.targetRole?(' · '+esc(r.targetRole)):'')+'</option>'; }).join('') +
+    '</select>' +
+    '<div class="hint">没有合适版本？先去「简历中心」新建一版（简历 = Evidence 的组合）</div></div>';
+  var cur = rs.filter(function(r){ return r.name === o.resumeVersion; })[0];
+  if(cur){
+    var evs = listOf('evidence');
+    var ids = cur.evidenceIds || [];
+    h += '<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-bottom:5px">该版本包含的 Evidence（'+ids.length+'）</div>';
+    h += ids.length ? '<div style="display:flex;gap:6px;flex-wrap:wrap">' + ids.map(function(id){
+        var e = evs.filter(function(x){ return x.id === id; })[0];
+        return '<span class="chip">'+esc(e?e.name:'（已删除）')+'</span>';
+      }).join('') + '</div>' : '<div class="muted small">该版本还没有挂载 Evidence</div>';
+    if(cur.notes) h += '<div style="margin-top:8px;font-size:12.5px;color:var(--text-2)">'+esc(cur.notes)+'</div>';
+    var bullets = ids.map(function(id){
+      var e = evs.filter(function(x){ return x.id === id; })[0];
+      return (e && e.resumeBullet) ? e.resumeBullet : null;
+    }).filter(Boolean);
+    if(bullets.length){
+      h += '<div style="margin-top:10px"><div style="font-size:11px;font-weight:720;color:var(--text-3);margin-bottom:5px">Resume Bullet 预览（来自 Evidence）</div>' +
+        '<div class="jd-box" style="background:var(--surface);max-height:none">' + bullets.map(function(b){ return '· '+esc(b); }).join('<br>') + '</div></div>';
+    }
+  }
+  h += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">' +
+    '<button class="btn btn-sm" data-act="nav" data-view="resume">'+ico('file')+'去简历中心</button>' +
+    '<button class="btn btn-sm" data-act="resume-new">'+ico('plus')+'新建简历版本</button>' +
+    copilotBtn('resume', o.id, 'Copilot 基于 Evidence 改简历') +
+  '</div>';
+  return h;
+}
+
+function applySection(o){
+  var h = '<div class="kv" style="margin-bottom:12px">' +
+    '<div class="kv-item"><div class="k">当前状态</div><div class="v">'+statusTag(o.status)+'</div></div>' +
+    '<div class="kv-item"><div class="k">投递日期</div><div class="v">'+esc(o.appliedDate ? (o.appliedDate+' · '+cnDate(o.appliedDate)) : '未投递')+'</div></div>' +
+    '<div class="kv-item"><div class="k">来源渠道</div><div class="v">'+esc(o.source||'—')+'</div></div>' +
+    '<div class="kv-item"><div class="k">联系人</div><div class="v">'+esc(o.contact||'—')+'</div></div>' +
+    '<div class="kv-item"><div class="k">使用简历</div><div class="v">'+esc(o.resumeVersion||'—')+'</div></div>' +
+    '<div class="kv-item"><div class="k">最终结果</div><div class="v">'+esc(o.result||'进行中')+'</div></div>' +
+  '</div>';
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">' +
+    '<button class="btn btn-sm" data-act="mark-applied" data-id="'+esc(o.id)+'">'+ico('check')+'标记今日已投递</button>' +
+    '<button class="btn btn-sm" data-act="next-stage" data-id="'+esc(o.id)+'">'+ico('arrow')+'推进到下一阶段</button>' +
+  '</div>';
+  h += '<div style="font-size:11px;font-weight:700;color:var(--text-3);margin-bottom:8px">时间线</div><div class="timeline">' + timelineOf(o) + '</div>';
+  return h;
+}
+
+function timelineOf(o){
+  var items = [];
+  (o.statusHistory||[]).forEach(function(e){items.push({d:e.at.slice(0,10),t:'状态：'+e.status,m:e.at,c:'#3b5bdb'});});
+  if(o.createdAt) items.push({ d:o.createdAt, t:'录入岗位', m:'来源：'+(o.source||'—'), c:'#98a2b3', tag:'' });
+  if(o.appliedDate) items.push({ d:o.appliedDate, t:'投递', m:'使用简历：'+(o.resumeVersion||'—'), c:'#3b5bdb', tag:'' });
+  interviewsOf(o.id).forEach(function(iv){
+    items.push({ d:iv.date||'', t:iv.round||'面试', m:(iv.type?iv.type+' · ':'')+(iv.interviewer||''), c:'#7a5af8', n:iv.notes, tag:iv.result });
+  });
+  feedbacksOf(o.id).forEach(function(fb){
+    items.push({ d:fb.date||'', t:'反馈复盘', m:fb.channel||'', c:'#f79009', n:fb.content, tag:'' });
+  });
+  if(!items.length) return '<div class="today-empty">还没有可追踪的记录</div>';
+  items.sort(function(a,b){ return (a.d||'0') < (b.d||'0') ? -1 : 1; });
+  return items.map(function(it){
+    return '<div class="tl-item"><div class="tl-dot" style="background:'+it.c+'">'+(it.d?('<span style="font-size:9px">'+esc(it.d.slice(5).replace('-','/'))+'</span>'):'?')+'</div>' +
+      '<div class="tl-body"><div class="tl-title">'+esc(it.t)+(it.tag?(' <span class="chip">'+esc(it.tag)+'</span>'):'')+'</div>' +
+      '<div class="tl-meta">'+esc(it.d||'无日期')+(it.m?(' · '+esc(it.m)):'')+'</div>' +
+      (it.n?'<div class="tl-note">'+esc(it.n)+'</div>':'')+'</div></div>';
+  }).join('');
+}
+
+function debriefBlock(iv){
+  var has = iv.wentWell || iv.wentBad || iv.gapFound || iv.newEvidence || iv.lessonNote || iv.nextAction;
+  if(!has) return '';
+  var h = '<div style="margin-top:6px;border:1px dashed var(--border-strong);border-radius:var(--radius-sm);padding:8px 10px;background:var(--surface-2)">';
+  h += '<div style="font-size:11px;font-weight:720;color:var(--text-3);margin-bottom:4px">DEBRIEF · 面试复盘</div>';
+  if(iv.wentWell) h += '<div class="small" style="color:#027a48"><b>答得好：</b>'+esc(iv.wentWell)+'</div>';
+  if(iv.wentBad)  h += '<div class="small" style="color:#b42318;margin-top:3px"><b>答得差：</b>'+esc(iv.wentBad)+'</div>';
+  if(iv.gapFound) h += '<div class="small" style="color:var(--warn);margin-top:3px"><b>暴露 Gap：</b>'+esc(iv.gapFound)+'</div>';
+  if(iv.newEvidence) h += '<div class="small" style="color:var(--primary);margin-top:3px"><b>新发现 Evidence：</b>'+esc(iv.newEvidence)+'</div>';
+  if(iv.lessonNote) h += '<div class="small" style="margin-top:3px;color:var(--text-2)"><b>Lesson：</b>'+esc(iv.lessonNote)+'</div>';
+  if(iv.nextAction) h += '<div class="small" style="margin-top:3px;color:var(--primary)"><b>下一步：</b>'+esc(iv.nextAction)+'</div>';
+  h += '<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">' +
+    (iv.gapFound?'<button class="btn btn-xs" data-act="debrief-to-gap" data-iv="'+esc(iv.id)+'">'+ico('arrow')+'Gap → Gap & Action</button>':'') +
+    (iv.newEvidence?'<button class="btn btn-xs" data-act="debrief-to-ev" data-iv="'+esc(iv.id)+'">'+ico('arrow')+'Evidence → 证据库</button>':'') +
+    (iv.lessonNote?'<button class="btn btn-xs" data-act="debrief-to-fb" data-iv="'+esc(iv.id)+'">'+ico('arrow')+'Lesson → Feedback</button>':'') +
+  '</div></div>';
+  return h;
+}
+
+function interviewSection(o, ivs){
+  var h = ivs.length ? '<div class="timeline">' + ivs.map(function(iv){
+      return '<div class="tl-item"><div class="tl-dot" style="background:#7a5af8">' + esc((iv.round||'面').slice(0,2)) + '</div>' +
+        '<div class="tl-body"><div class="tl-title">'+esc(iv.round||'面试')+(iv.result?(' · '+esc(iv.result)):'')+'</div>' +
+        '<div class="tl-meta">'+esc(iv.date||'无日期')+(iv.type?(' · '+esc(iv.type)):'')+(iv.interviewer?(' · '+esc(iv.interviewer)):'')+'</div>' +
+        (iv.notes?'<div class="tl-note">'+esc(iv.notes)+'</div>':'') +
+        debriefBlock(iv) +
+        '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">' +
+          '<button class="btn btn-xs" data-act="iv-edit" data-iv="'+esc(iv.id)+'">'+ico('edit')+'编辑 / 复盘</button>' +
+          '<button class="btn btn-xs btn-danger" data-act="iv-del" data-iv="'+esc(iv.id)+'">'+ico('trash')+'</button>' +
+        '</div></div></div>';
+    }).join('') + '</div>' : '<div class="today-empty">还没有面试记录</div>';
+  h += '<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">' +
+    '<button class="btn btn-sm" data-act="iv-add" data-id="'+esc(o.id)+'">'+ico('plus')+'添加面试记录</button>' +
+    copilotBtn('interview', o.id, 'Copilot 面试准备') +
+  '</div>';
+  return h;
+}
+
+function feedbackSection(o, fbs){
+  var h = fbs.length ? '<div class="timeline">' + fbs.map(function(fb){
+      return '<div class="tl-item"><div class="tl-dot" style="background:#f79009">反</div>' +
+        '<div class="tl-body"><div class="tl-title">'+esc(fb.channel||'反馈')+'</div>' +
+        '<div class="tl-meta">'+esc(fb.date||'无日期')+'</div>' +
+        '<div class="tl-note">'+esc(fb.content||'')+'</div>' +
+        (fb.lesson?'<div class="tl-meta" style="margin-top:4px;color:var(--primary)">教训 → '+esc(fb.lesson)+'</div>':'') +
+        (fb.lessonId?('<div style="margin-top:4px">'+tag('已提炼为 Lesson','#7a5af8')+'</div>'):'') +
+        '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">' +
+          '<button class="btn btn-xs" data-act="fb-edit" data-fb="'+esc(fb.id)+'">'+ico('edit')+'</button>' +
+          '<button class="btn btn-xs btn-danger" data-act="fb-del" data-fb="'+esc(fb.id)+'">'+ico('trash')+'</button>' +
+          '<button class="btn btn-xs" data-act="fb-to-lesson" data-fb="'+esc(fb.id)+'">'+ico('arrow')+'提炼 Lesson</button>' +
+          '<button class="btn btn-xs" data-act="gap-from-fb" data-fb="'+esc(fb.id)+'">'+ico('arrow')+'转缺口</button>' +
+        '</div></div></div>';
+    }).join('') + '</div>' : '<div class="today-empty">还没有反馈复盘。市场反馈必须转化成下一步 Action。</div>';
+  h += '<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">' +
+    '<button class="btn btn-sm" data-act="fb-add" data-id="'+esc(o.id)+'">'+ico('plus')+'添加反馈复盘</button>' +
+    copilotBtn('feedback','','Copilot 分析反馈模式') +
+  '</div>';
+  return h;
+}
+
+/* =========================================================
+   模块 2：Evidence Bank —— 长期个人证据库
+   ========================================================= */
+function viewEvidence(){
+  var f = state.evFilter, q = (f.q||'').toLowerCase();
+  var items = listOf('evidence').filter(function(e){
+    if(f.type && e.type !== f.type) return false;
+    if(f.strength && e.strength !== f.strength) return false;
+    if(q){
+      var s = ((e.name||'')+' '+(e.category||'')+' '+(e.background||'')+' '+(e.action||'')+' '+(e.result||'')+' '+(e.ability||'')+' '+(e.tags||'')+' '+
+               (e.capabilityTags||'')+' '+(e.metric||'')+' '+(e.proof||'')+' '+(e.answerQuestions||'')+' '+(e.resumeBullet||'')+' '+(e.story||'')).toLowerCase();
+      if(s.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+  var h = '<div class="h-page"><div><h1 class="h-title">个人证据库</h1>' +
+    '<div class="h-desc">Evidence 是长期资产，简历只是 Evidence 的组合。共 '+listOf('evidence').length+' 条</div></div>' +
+    '<div style="margin-left:auto"><button class="btn btn-primary" data-act="ev-new">'+ico('plus')+'新增证据</button></div></div>';
+
+  h += '<div class="card" style="padding:10px 12px;margin-bottom:12px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+    '<div class="search-wrap" style="flex:1;min-width:180px">'+ico('search')+
+      '<input type="text" data-chg="ev-q" value="'+esc(f.q)+'" placeholder="搜索证据名称 / 内容 / 标签"></div>' +
+    '<select data-chg="ev-type" style="width:auto;min-width:120px;min-height:34px"><option value="">全部类型</option>' +
+      EV_TYPES.map(function(t){ return '<option value="'+esc(t)+'"'+(f.type===t?' selected':'')+'>'+esc(t)+'</option>'; }).join('') +
+    '</select>' +
+    '<select data-chg="ev-strength" style="width:auto;min-width:120px;min-height:34px"><option value="">全部强度</option>' +
+      EV_STRENGTHS.map(function(t){ return '<option value="'+esc(t)+'"'+(f.strength===t?' selected':'')+'>'+esc(t)+'</option>'; }).join('') +
+    '</select></div></div>';
+
+  if(!items.length) return h + '<div class="card"><div class="empty">'+ico('layers')+'<p>还没有证据，先沉淀你最拿得出手的 3 段经历</p>' +
+    '<button class="btn btn-primary" data-act="ev-new">'+ico('plus')+'新增证据</button></div></div>';
+
+  h += '<div class="chain" style="margin-bottom:10px"><i class="hi">JD Requirement</i><span class="ar">→</span><i>Evidence</i>' +
+       '<span class="ar">→</span><i>Resume Bullet</i><span class="ar">→</span><i>Interview Story</i></div>';
+
+  h += '<div class="grid grid-2">';
+  items.forEach(function(e){
+    var used = allOpps().filter(function(o){ return (o.matches||[]).some(function(m){ return m.evId === e.id; }); });
+    var reqTexts = [];
+    used.forEach(function(o){
+      (o.matches||[]).forEach(function(m){
+        if(m.evId !== e.id) return;
+        var r = (o.reqs||[]).filter(function(x){ return x.id === m.reqId; })[0];
+        if(r) reqTexts.push(o.company+'：'+r.text);
+      });
+    });
+    h += '<div class="ev-card">' +
+      '<div class="ev-head"><div style="flex:1;min-width:0"><div class="ev-name">'+esc(e.name)+'</div>' +
+        '<div class="ev-sec-t">'+esc(e.category||'未分类')+'</div></div>' +
+        strengthTag2(e.strength) + evTypeTag(e.type) +
+        '<button class="btn btn-xs" data-act="ev-edit" data-id="'+esc(e.id)+'">'+ico('edit')+'</button>' +
+        '<button class="btn btn-xs btn-danger" data-act="ev-del" data-id="'+esc(e.id)+'">'+ico('trash')+'</button></div>' +
+      (e.background?'<div class="ev-line"><b>背景</b>'+esc(e.background)+'</div>':'') +
+      (e.action?'<div class="ev-line"><b>我做了</b>'+esc(e.action)+'</div>':'') +
+      (e.result?'<div class="ev-line"><b>结果</b>'+esc(e.result)+'</div>':'') +
+      (e.metric?'<div class="ev-line"><b>量化</b><span style="color:var(--success);font-weight:650">'+esc(e.metric)+'</span></div>':'') +
+      (e.ability?'<div class="ev-line"><b>证明</b>'+esc(e.ability)+'</div>':'') +
+      (e.proof?'<div class="ev-line"><b>Proof</b>'+esc(e.proof)+'</div>':'') +
+      (e.resumeBullet?'<div class="ev-line"><b>Bullet</b>'+esc(e.resumeBullet)+'</div>':'') +
+      (e.answerQuestions?'<div class="ev-line"><b>可答</b>'+esc(e.answerQuestions)+'</div>':'') +
+      (e.story?'<div class="ev-line"><b>STAR</b>'+esc(e.story)+'</div>':'') +
+      (e.capabilityTags?'<div style="display:flex;gap:5px;flex-wrap:wrap">' +
+        String(e.capabilityTags).split(/[,，]/).map(function(t){ return t.trim()?'<span class="chip">'+esc(t.trim())+'</span>':''; }).join('') + '</div>':'') +
+      (reqTexts.length?'<div style="font-size:11.5px;color:var(--text-3);margin-top:4px"><b>对应 JD 要求：</b>'+esc(reqTexts.slice(0,3).join('；'))+(reqTexts.length>3?(' 等 '+reqTexts.length+' 条'):'')+'</div>':'') +
+      '<div class="ev-foot">' +
+        (e.tags?'<span class="chip">'+ico('target')+esc(e.tags)+'</span>':'') +
+        '<span class="chip"'+(used.length?' style="background:var(--primary-weak);color:var(--primary-strong)"':'')+'>已被 '+used.length+' 个岗位引用</span>' +
+        '<button class="btn btn-xs" data-act="story-from-ev" data-id="'+esc(e.id)+'">'+ico('star')+'沉淀为 STAR Story</button>' +
+      '</div></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+/* =========================================================
+   模块 3-9：结构化占位模块（字段齐全、可录入、可闭环）
+   ========================================================= */
+var CFGS = {
+  targets: { key:'targets', title:'目标岗位', desc:'先定义你要打的方向，JD 才有筛选标准', cols:'grid-2',
+    fields:[ {k:'title',label:'目标岗位名称',ph:'例：临床数据科学家'},
+             {k:'direction',label:'岗位方向',ph:'例：AI 医疗 / 真实世界研究'},
+             {k:'level',label:'级别',ph:'例：高级 / 资深'},
+             {k:'city',label:'城市',ph:'上海 / 北京 / 远程'},
+             {k:'salary',label:'目标薪资',ph:'40-60K'},
+             {k:'priority',label:'优先级',type:'select',opts:PRIORITIES},
+             {k:'keyReq',label:'核心要求（JD 共性提炼）',type:'area',rows:3},
+             {k:'why',label:'为什么选这个方向',type:'area',rows:2},
+             {k:'status',label:'状态',type:'select',opts:['探索中','主攻','暂缓']} ],
+    card:function(it){
+      return cardWrap(it,'targets',
+        '<div style="font-size:14px;font-weight:680">'+esc(it.title)+'</div>' +
+        '<div class="small muted" style="margin-top:1px">'+esc(it.direction||'')+(it.level?(' · '+esc(it.level)):'')+'</div>' +
+        row(prioTag(it.priority), chip(it.city), chip(it.salary), tag(it.status)) +
+        (it.keyReq?'<div class="small" style="margin-top:6px;color:var(--text-2)"><b>核心要求：</b>'+esc(it.keyReq)+'</div>':'') +
+        (it.why?'<div class="small" style="margin-top:3px;color:var(--text-3)"><b>为什么：</b>'+esc(it.why)+'</div>':''));
+    } },
+
+  resumes: { key:'resumes', title:'简历中心', desc:'一版简历 = 一组 Evidence 的组合，针对不同岗位方向', cols:'grid-2',
+    fields:[ {k:'name',label:'版本名称',ph:'例：V3 - AI医疗方向'},
+             {k:'targetRole',label:'目标岗位/方向',ph:'例：临床数据科学家'},
+             {k:'version',label:'版本号/日期',ph:'2026-09'},
+             {k:'summary',label:'简历摘要 / 个人定位',type:'area',rows:3},
+             {k:'notes',label:'备注（改了什么、给谁投过）',type:'area',rows:2} ],
+    card:function(it){
+      var ids = it.evidenceIds || [], evs = listOf('evidence');
+      return cardWrap(it,'resumes',
+        '<div style="font-size:14px;font-weight:680">'+esc(it.name)+'</div>' +
+        '<div class="small muted" style="margin-top:1px">'+esc(it.targetRole||'')+(it.version?(' · '+esc(it.version)):'')+'</div>' +
+        (it.summary?'<div class="small" style="margin-top:6px;color:var(--text-2)">'+esc(it.summary)+'</div>':'') +
+        '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">' +
+          (ids.length? ids.map(function(id){ var e = evs.filter(function(x){return x.id===id;})[0]; return '<span class="chip">'+esc(e?e.name:'已删除')+'</span>'; }).join('')
+                     : '<span class="small muted">未挂载 Evidence</span>') +
+        '</div>' +
+        (it.notes?'<div class="small muted" style="margin-top:6px">'+esc(it.notes)+'</div>':'') +
+        '<div style="margin-top:8px"><button class="btn btn-xs" data-act="resume-pick" data-id="'+esc(it.id)+'">'+ico('layers')+'勾选 Evidence</button></div>');
+    } },
+
+  interviews: { key:'interviews', title:'面试中心', desc:'所有面试记录，按时间和轮次汇总', cols:'grid-2',
+    fields:[ {k:'oppId',label:'关联岗位',type:'select',opts:[],dyn:'opps'},
+             {k:'round',label:'轮次',type:'select',opts:INTERVIEW_ROUNDS},
+             {k:'date',label:'面试日期',type:'date'},
+             {k:'type',label:'形式',type:'select',opts:['现场','视频','电话','笔试','其他']},
+             {k:'interviewer',label:'面试官',ph:'姓名 / 职位'},
+             {k:'result',label:'结果',type:'select',opts:['未出','通过','未通过','待定']},
+             {k:'notes',label:'面试记录（问了什么、答得怎样）',type:'area',rows:4},
+             {k:'todo',label:'面试后待办',type:'area',rows:2} ],
+    card:function(it){
+      var o = findById('opportunities', it.oppId);
+      var h = '<div class="ev-card">';
+      h += '<div style="font-size:14px;font-weight:680">'+esc(o?o.company:'（岗位已删除）')+(it.round?(' · '+esc(it.round)):'')+'</div>' +
+        '<div class="small muted" style="margin-top:1px">'+esc(o?o.role:'')+'</div>' +
+        row(chip(it.date), tag(it.type), statusTag(it.result||'未出')) +
+        (it.interviewer?'<div class="small" style="margin-top:5px;color:var(--text-2)"><b>面试官：</b>'+esc(it.interviewer)+'</div>':'') +
+        (it.notes?'<div class="small" style="margin-top:5px;color:var(--text-2);white-space:pre-wrap">'+esc(it.notes)+'</div>':'') +
+        (it.todo?'<div class="small" style="margin-top:5px;color:var(--primary)"><b>待办：</b>'+esc(it.todo)+'</div>':'');
+      h += debriefBlock(it);
+      h += '<div class="ev-foot"><button class="btn btn-xs" data-act="iv-edit" data-iv="'+esc(it.id)+'">'+ico('edit')+'编辑 / 复盘</button>' +
+        '<button class="btn btn-xs btn-danger" data-act="iv-del" data-iv="'+esc(it.id)+'">'+ico('trash')+'删除</button></div>';
+      return h + '</div>';
+    } },
+
+  feedbacks: { key:'feedbacks', title:'反馈复盘', desc:'市场反馈 → 教训 → 下一步行动', cols:'grid-2',
+    fields:[ {k:'oppId',label:'关联岗位',type:'select',opts:[],dyn:'opps'},
+             {k:'date',label:'日期',type:'date'},
+             {k:'channel',label:'反馈来源',type:'select',opts:['HR','面试官','猎头','内推人','邮件拒信','自我复盘','其他']},
+             {k:'content',label:'反馈原文 / 事实',type:'area',rows:3},
+             {k:'lesson',label:'我得到的教训',type:'area',rows:2},
+             {k:'action',label:'转化成的下一步行动',type:'area',rows:2} ],
+    card:function(it){
+      var o = findById('opportunities', it.oppId);
+      var l = it.lessonId ? findById('lessons', it.lessonId) : null;
+      var h = '<div class="ev-card">';
+      h += '<div style="font-size:14px;font-weight:680">'+esc(o?o.company:'（岗位已删除）')+'</div>' +
+        '<div class="small muted" style="margin-top:1px">'+esc(o?o.role:'')+'</div>' +
+        row(chip(it.date), tag(it.channel)) +
+        (it.content?'<div class="small" style="margin-top:6px;color:var(--text-2);white-space:pre-wrap">'+esc(it.content)+'</div>':'') +
+        (it.lesson?'<div class="small" style="margin-top:5px;color:var(--warn)"><b>教训：</b>'+esc(it.lesson)+'</div>':'') +
+        (it.action?'<div class="small" style="margin-top:5px;color:var(--primary)"><b>行动：</b>'+esc(it.action)+'</div>':'');
+      if(l) h += '<div style="margin-top:6px">'+tag('已提炼 Lesson：'+l.title,'#7a5af8')+'</div>';
+      h += '<div class="ev-foot" style="flex-wrap:wrap">' +
+        '<button class="btn btn-xs" data-act="fb-to-lesson" data-fb="'+esc(it.id)+'">'+ico('arrow')+'提炼 Lesson</button>' +
+        '<button class="btn btn-xs" data-act="gap-from-fb" data-fb="'+esc(it.id)+'">'+ico('arrow')+'转缺口</button>' +
+        '<button class="btn btn-xs" data-act="s-edit" data-key="feedbacks" data-id="'+esc(it.id)+'">'+ico('edit')+'编辑</button>' +
+        '<button class="btn btn-xs btn-danger" data-act="s-del" data-key="feedbacks" data-id="'+esc(it.id)+'">'+ico('trash')+'删除</button></div>';
+      return h + '</div>';
+    } },
+
+  gaps: { key:'gaps', title:'能力缺口', desc:'缺口来自三处：JD 未匹配的要求、面试 Debrief、市场反馈。每条必须落到 Action。', cols:'grid-2',
+    fields:[ {k:'title',label:'缺口名称',ph:'例：缺少 AI 产品落地案例'},
+             {k:'gapType',label:'缺口类型',type:'select',opts:GAP_TYPES},
+             {k:'oppId',label:'关联岗位',type:'select',opts:[],dyn:'opps'},
+             {k:'category',label:'类别',type:'select',opts:['硬技能','项目经验','行业认知','表达与面试','证书学历','人脉','其他']},
+             {k:'source',label:'来源',ph:'例：联影 JD 未匹配 / 二面复盘'},
+             {k:'severity',label:'严重度',type:'select',opts:['高','中','低']},
+             {k:'action',label:'一句话应对策略',type:'area',rows:2},
+             {k:'due',label:'截止日期',type:'date'},
+             {k:'status',label:'状态',type:'select',opts:GAP_STATUS} ],
+    card:function(it){
+      var od = isOverdue(it.due) && it.status !== '已完成';
+      var op = findById('opportunities', it.oppId);
+      var acts = actionsOf(it.id);
+      var h = '<div class="ev-card">';
+      h += '<div style="font-size:14px;font-weight:680">'+esc(it.title)+'</div>';
+      h += row(gapTypeTag(it.gapType || 'True Gap'), severityTag(it.severity), statusTag2(it.status||'待开始'),
+               op?chip(op.company):'',
+               it.due?('<span class="chip"'+(od?' style="background:var(--danger-weak);color:var(--danger);font-weight:650"':'')+'>'+ico('clock')+esc(dueLabel(it.due))+'</span>'):'');
+      if(it.gapType) h += '<div class="small muted" style="margin-top:4px">'+esc(GAP_TYPE_DESC[it.gapType]||'')+'</div>';
+      if(it.source) h += '<div class="small muted" style="margin-top:4px"><b>来源：</b>'+esc(it.source)+'</div>';
+      if(it.action) h += '<div class="small" style="margin-top:4px;color:var(--text-2)"><b>策略：</b>'+esc(it.action)+'</div>';
+      h += '<div class="sub-card" style="margin-top:9px"><div class="sub-head">ACTION'+
+           '<button class="btn btn-xs" data-act="action-add" data-gap="'+esc(it.id)+'"'+(op?(' data-opp="'+esc(op.id)+'"'):'')+'>'+ico('plus')+'加 Action</button></div>';
+      if(!acts.length) h += '<div class="small" style="color:var(--danger)">还没有 Action —— 缺口不落到行动就等于没解决。</div>';
+      else acts.forEach(function(a){ h += actionRow(a, true); });
+      h += '</div>';
+      h += '<div class="ev-foot"><button class="btn btn-xs" data-act="s-edit" data-key="gaps" data-id="'+esc(it.id)+'">'+ico('edit')+'编辑</button>' +
+           '<button class="btn btn-xs btn-danger" data-act="s-del" data-key="gaps" data-id="'+esc(it.id)+'">'+ico('trash')+'删除</button></div>';
+      return h + '</div>';
+    } },
+
+  actions: { key:'actions', title:'行动清单', desc:'每个 Action 对应一个 Gap，可关联 Opportunity，有优先级、截止和状态', cols:'grid-2',
+    fields:[ {k:'title',label:'Action 内容',ph:'例：把 V3 简历摘要改成产品口径'},
+             {k:'gapId',label:'对应 Gap',type:'select',opts:[],dyn:'gaps'},
+             {k:'oppId',label:'对应 Opportunity',type:'select',opts:[],dyn:'opps'},
+             {k:'priority',label:'优先级',type:'select',opts:PRIORITIES},
+             {k:'due',label:'截止日期',type:'date'},
+             {k:'status',label:'状态',type:'select',opts:ACTION_STATUS},
+             {k:'note',label:'备注 / 产出标准',type:'area',rows:2} ],
+    card:function(it){ return actionRow(it, false); } },
+
+  lessons: { key:'lessons', title:'Lesson · 可迁移认知', desc:'从一条或多条 Feedback 中提炼出的认知，不是事实本身', cols:'grid-2',
+    fields:[ {k:'title',label:'Lesson',ph:'例：我的简历第一行必须先说业务方要看的那句话'},
+             {k:'category',label:'类别',type:'select',opts:['简历呈现','面试表达','能力证据','方向选择','投递策略','人脉']},
+             {k:'content',label:'具体认知',type:'area',rows:3},
+             {k:'evidenceNote',label:'支撑它的反馈（客观事实）',type:'area',rows:2},
+             {k:'source',label:'来源场景',ph:'例：某大厂 · HR 反馈'},
+             {k:'date',label:'提炼日期',type:'date'},
+             {k:'status',label:'状态',type:'select',opts:['生效中','已沉淀','已过时']} ],
+    card:function(it){
+      var fbs = listOf('feedbacks').filter(function(f){ return f.lessonId === it.id; });
+      var sts = strategiesOfLesson(it.id);
+      var h = '<div class="ev-card"><div style="font-size:14px;font-weight:680">'+esc(it.title)+'</div>';
+      h += row(tag(it.category||'认知','#7a5af8'), statusTag2(it.status||'生效中'), chip(it.date), chip(it.source));
+      if(it.content) h += '<div class="small" style="margin-top:6px;color:var(--text-2)">'+esc(it.content)+'</div>';
+      if(it.evidenceNote) h += '<div class="small muted" style="margin-top:4px"><b>事实依据：</b>'+esc(it.evidenceNote)+'</div>';
+      if(fbs.length) h += '<div class="small muted" style="margin-top:4px">来自 '+fbs.length+' 条 Feedback</div>';
+      if(sts.length) h += '<div style="margin-top:6px">'+sts.map(function(s){ return tag('策略：'+s.title,'#12b76a'); }).join(' ')+'</div>';
+      h += '<div class="ev-foot" style="flex-wrap:wrap">' +
+           '<button class="btn btn-xs" data-act="lesson-to-strategy" data-id="'+esc(it.id)+'">'+ico('arrow')+'转 Strategy</button>' +
+           '<button class="btn btn-xs" data-act="lesson-to-action" data-id="'+esc(it.id)+'">'+ico('plus')+'转 Action</button>' +
+           '<button class="btn btn-xs" data-act="s-edit" data-key="lessons" data-id="'+esc(it.id)+'">'+ico('edit')+'编辑</button>' +
+           '<button class="btn btn-xs btn-danger" data-act="s-del" data-key="lessons" data-id="'+esc(it.id)+'">'+ico('trash')+'</button></div>';
+      return h + '</div>';
+    } },
+
+  strategies: { key:'strategies', title:'Strategy Update · 策略调整', desc:'Lesson 带来的策略调整：以后我怎么做会不一样', cols:'grid-2',
+    fields:[ {k:'title',label:'策略调整',ph:'例：简历摘要第一句改为产品口径'},
+             {k:'area',label:'调整领域',type:'select',opts:STRATEGY_AREAS},
+             {k:'lessonId',label:'来自哪条 Lesson',type:'select',opts:[],dyn:'lessons'},
+             {k:'content',label:'具体怎么改',type:'area',rows:3},
+             {k:'status',label:'状态',type:'select',opts:STRATEGY_STATUS},
+             {k:'date',label:'生效日期',type:'date'} ],
+    card:function(it){
+      var l = it.lessonId ? findById('lessons', it.lessonId) : null;
+      var h = '<div class="ev-card"><div style="font-size:14px;font-weight:680">'+esc(it.title)+'</div>';
+      h += row(tag(it.area||'策略','#2e90fa'), statusTag2(it.status||'已采纳'), chip(it.date), l?tag('来自：'+l.title,'#7a5af8'):'');
+      if(it.content) h += '<div class="small" style="margin-top:6px;color:var(--text-2)">'+esc(it.content)+'</div>';
+      h += '<div class="ev-foot"><button class="btn btn-xs" data-act="s-edit" data-key="strategies" data-id="'+esc(it.id)+'">'+ico('edit')+'编辑</button>' +
+           '<button class="btn btn-xs btn-danger" data-act="s-del" data-key="strategies" data-id="'+esc(it.id)+'">'+ico('trash')+'删除</button></div>';
+      return h + '</div>';
+    } },
+
+  questions: { key:'questions', title:'Question Bank · 真实面试题', desc:'面试里被问过的真实问题，沉淀成可复用的答案', cols:'grid-2',
+    fields:[ {k:'question',label:'被问的问题',type:'area',rows:2,ph:'例：如果模型效果不达预期，你怎么向业务解释？'},
+             {k:'cat',label:'类型',type:'select',opts:QUESTION_CATS},
+             {k:'oppId',label:'来自哪个岗位',type:'select',opts:[],dyn:'opps'},
+             {k:'source',label:'轮次 / 面试官',ph:'例：二面 · 临床总监'},
+             {k:'myAnswer',label:'我当时怎么答的',type:'area',rows:3},
+             {k:'better',label:'更好的答法',type:'area',rows:3},
+             {k:'date',label:'日期',type:'date'} ],
+    card:function(it){
+      var op = findById('opportunities', it.oppId);
+      var h = '<div class="ev-card"><div style="font-size:13.5px;font-weight:680;line-height:1.5">'+esc(it.question||'')+'</div>';
+      h += row(tag(it.cat||'其他','#6941c6'), op?chip(op.company):'', chip(it.source), chip(it.date));
+      if(it.myAnswer) h += '<div class="small" style="margin-top:6px;color:var(--text-2)"><b>我答：</b>'+esc(it.myAnswer)+'</div>';
+      if(it.better) h += '<div class="small" style="margin-top:4px;color:var(--primary)"><b>更好答法：</b>'+esc(it.better)+'</div>';
+      h += '<div class="ev-foot"><button class="btn btn-xs" data-act="s-edit" data-key="questions" data-id="'+esc(it.id)+'">'+ico('edit')+'编辑</button>' +
+           '<button class="btn btn-xs btn-danger" data-act="s-del" data-key="questions" data-id="'+esc(it.id)+'">'+ico('trash')+'删除</button></div>';
+      return h + '</div>';
+    } },
+
+  stories: { key:'stories', title:'Story Bank · STAR 故事库', desc:'从 Evidence 沉淀而来，面试直接讲的口径版本', cols:'grid-2',
+    fields:[ {k:'title',label:'故事标题',ph:'例：3 周交付 3 万份病历抽取'},
+             {k:'evId',label:'来自 Evidence',type:'select',opts:[],dyn:'evidence'},
+             {k:'s',label:'Situation 背景',type:'area',rows:2},
+             {k:'t',label:'Task 任务',type:'area',rows:2},
+             {k:'a',label:'Action 行动',type:'area',rows:3},
+             {k:'r',label:'Result 结果',type:'area',rows:2},
+             {k:'tags',label:'适配岗位 / 场景',ph:'用逗号分隔'} ],
+    card:function(it){
+      var e = it.evId ? findById('evidence', it.evId) : null;
+      var h = '<div class="ev-card"><div style="font-size:14px;font-weight:680">'+esc(it.title||'')+'</div>';
+      h += row(e?tag('Evidence：'+e.name,'#12b76a'):'', chip(it.tags));
+      [['S',it.s],['T',it.t],['A',it.a],['R',it.r]].forEach(function(p){
+        if(p[1]) h += '<div class="small" style="margin-top:4px;color:var(--text-2)"><b>'+p[0]+'：</b>'+esc(p[1])+'</div>';
+      });
+      h += '<div class="ev-foot"><button class="btn btn-xs" data-act="s-edit" data-key="stories" data-id="'+esc(it.id)+'">'+ico('edit')+'编辑</button>' +
+           '<button class="btn btn-xs btn-danger" data-act="s-del" data-key="stories" data-id="'+esc(it.id)+'">'+ico('trash')+'删除</button></div>';
+      return h + '</div>';
+    } },
+
+  companies: { key:'companies', title:'企业档案', desc:'按 城市 → 行业 → 企业 组织，面试前 10 分钟快速过一遍', cols:'grid-2',
+    fields:[ {k:'name',label:'公司名称',ph:'例：联影医疗'},
+             {k:'city',label:'城市',ph:'上海'},
+             {k:'industry',label:'行业',ph:'医疗影像设备 / AI 软件'},
+             {k:'business',label:'核心业务',type:'area',rows:2},
+             {k:'products',label:'主要产品 / 产品线',type:'area',rows:2},
+             {k:'careers',label:'招聘页 / Careers 链接',ph:'https://'},
+             {k:'dept',label:'目标部门',ph:'例：AI 软件事业部'},
+             {k:'targetRole',label:'目标岗位',ph:'例：临床数据科学家'},
+             {k:'judgment',label:'我的判断',type:'area',rows:2,ph:'值不值得投？壁垒是什么？我的差异化在哪？'},
+             {k:'tags',label:'标签',ph:'用逗号分隔'} ],
+    card:function(it){
+      var opps = linkedOpps(it.name);
+      var cts = listOf('contacts').filter(function(c){ return c.company === it.name; });
+      var h = '<div class="ev-card"><div style="font-size:14px;font-weight:680">'+esc(it.name||'')+'</div>';
+      h += '<div class="market-path" style="margin-top:5px"><span>'+esc(it.city||'未填城市')+'</span><em>›</em>' +
+           '<span>'+esc(it.industry||'未填行业')+'</span><em>›</em><span>'+esc(it.name||'')+'</span>' +
+           (it.dept?('<em>›</em><span>'+esc(it.dept)+'</span>'):'') + (it.targetRole?('<em>›</em><span>'+esc(it.targetRole)+'</span>'):'') + '</div>';
+      if(it.business) h += '<div class="small" style="margin-top:6px;color:var(--text-2)"><b>核心业务：</b>'+esc(it.business)+'</div>';
+      if(it.products) h += '<div class="small" style="margin-top:3px;color:var(--text-2)"><b>主要产品：</b>'+esc(it.products)+'</div>';
+      if(it.judgment) h += '<div class="small" style="margin-top:5px;color:var(--primary)"><b>我的判断：</b>'+esc(it.judgment)+'</div>';
+      h += '<div class="sub-card" style="margin-top:9px"><div class="sub-head">关联 OPPORTUNITY（'+opps.length+'）'+
+           '<button class="btn btn-xs" data-act="opp-new">'+ico('plus')+'建岗位</button></div>';
+      h += opps.length ? opps.map(function(o){
+             return '<div class="act-row"><div class="act-main"><div class="act-t">'+esc(o.role||'岗位')+'</div></div>' +
+                    statusTag(o.status) + prioTag(o.priority) +
+                    '<button class="btn btn-xs" data-act="open-opp" data-id="'+esc(o.id)+'">'+ico('arrow')+'</button></div>';
+           }).join('') : '<div class="small muted">还没有对应岗位</div>';
+      h += '</div>';
+      h += '<div class="sub-card"><div class="sub-head">联系人（'+cts.length+'）'+
+           '<button class="btn btn-xs" data-act="ct-add" data-co="'+esc(it.name||'')+'">'+ico('plus')+'加联系人</button></div>';
+      h += cts.length ? cts.map(function(c){ return contactRow(c); }).join('') : '<div class="small muted">还没有联系人</div>';
+      h += '</div>';
+      if(it.careers) h += '<div style="margin-top:6px"><a href="'+esc(safeURL(it.careers))+'" target="_blank" rel="noopener" class="small">'+ico('link')+'招聘页</a></div>';
+      h += '<div class="ev-foot"><button class="btn btn-xs" data-act="s-edit" data-key="companies" data-id="'+esc(it.id)+'">'+ico('edit')+'编辑</button>' +
+           '<button class="btn btn-xs btn-danger" data-act="s-del" data-key="companies" data-id="'+esc(it.id)+'">'+ico('trash')+'删除</button></div>';
+      return h + '</div>';
+    } },
+
+  research: { key:'research', title:'行业与公司资料库', desc:'调研素材：公司、行业、岗位、技术', cols:'grid-2',
+    fields:[ {k:'title',label:'标题',ph:'例：联影医疗 2025 年报要点'},
+             {k:'type',label:'类型',type:'select',opts:RESEARCH_TYPES},
+             {k:'company',label:'关联公司',ph:'选填'},
+             {k:'url',label:'链接',ph:'https://'},
+             {k:'tags',label:'标签',ph:'用逗号分隔'},
+             {k:'notes',label:'要点 / 摘录',type:'area',rows:4} ],
+    card:function(it){
+      return cardWrap(it,'research',
+        '<div style="font-size:14px;font-weight:680">'+esc(it.title)+'</div>' +
+        row(tag(it.type||'其他'), chip(it.company)) +
+        (it.notes?'<div class="small" style="margin-top:6px;color:var(--text-2);white-space:pre-wrap">'+esc(it.notes)+'</div>':'') +
+        (it.tags?'<div class="small muted" style="margin-top:5px">#'+esc(String(it.tags).split(/[,，]/).join(' #'))+'</div>':'') +
+        (it.url?'<div style="margin-top:6px"><a href="'+esc(safeURL(it.url))+'" target="_blank" rel="noopener" class="small">'+ico('link')+'打开链接</a></div>':''));
+    } }
+};
+
+function chip(t){ return t ? '<span class="chip">'+esc(t)+'</span>' : ''; }
+function tag(t, color){ return t ? '<span class="chip"'+(color?(' style="background:'+color+'1a;color:'+color+'"'):'')+'>'+esc(t)+'</span>' : ''; }
+function severityTag(s){
+  if(!s) return '';
+  var c = s==='高'?'#f04438':(s==='中'?'#f79009':'#98a2b3');
+  return '<span class="tag" style="background:'+c+'1a;color:'+c+'">'+esc(s)+'</span>';
+}
+function statusTag2(s){
+  var map = {'待开始':'#98a2b3','进行中':'#f79009','已完成':'#12b76a'};
+  var c = map[s] || '#98a2b3';
+  return '<span class="tag" style="background:'+c+'1a;color:'+c+'"><i class="tag-dot" style="background:'+c+'"></i>'+esc(s)+'</span>';
+}
+function row(){ var a=[]; for(var i=0;i<arguments.length;i++){ if(arguments[i]) a.push(arguments[i]); } return a.length?('<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">'+a.join('')+'</div>'):''; }
+function cardWrap(it, key, inner){
+  return '<div class="ev-card">' + inner +
+    '<div class="ev-foot"><button class="btn btn-xs" data-act="s-edit" data-key="'+key+'" data-id="'+esc(it.id)+'">'+ico('edit')+'编辑</button>' +
+    '<button class="btn btn-xs btn-danger" data-act="s-del" data-key="'+key+'" data-id="'+esc(it.id)+'">'+ico('trash')+'删除</button></div></div>';
+}
+
+/* ---- V2：动态下拉选项 / 通用行渲染 ---- */
+function dynOpts(k){
+  if(k === 'opps')      return allOpps().map(function(o){ return { v:o.id, t:o.company + ' · ' + (o.role||'') }; });
+  if(k === 'gaps')      return listOf('gaps').map(function(g){ return { v:g.id, t:(g.gapType ? g.gapType+' · ' : '') + g.title }; });
+  if(k === 'lessons')   return listOf('lessons').map(function(l){ return { v:l.id, t:l.title }; });
+  if(k === 'evidence')  return listOf('evidence').map(function(e){ return { v:e.id, t:(e.type ? e.type+' · ' : '') + e.name }; });
+  if(k === 'companies') return listOf('companies').map(function(c){ return { v:c.id, t:c.name }; });
+  return [];
+}
+function actionRow(a, compact){
+  var g = a.gapId ? findById('gaps', a.gapId) : null;
+  var o = a.oppId ? findById('opportunities', a.oppId) : null;
+  var od = isOverdue(a.due) && a.status !== '已完成';
+  var done = a.status === '已完成';
+  var h = '<div class="act-row'+(done?' act-done':'')+'">';
+  h += '<button class="btn btn-xs" data-act="action-toggle" data-id="'+esc(a.id)+'" title="'+(done?'重新打开':'标记完成')+'">'+ico(done?'refresh':'check')+'</button>';
+  h += '<div class="act-main"><div class="act-t" style="font-size:12.5px;font-weight:620">'+esc(a.title||'')+'</div>';
+  var meta = [];
+  if(!compact && g) meta.push(tag('Gap：'+g.title, '#7a5af8'));
+  if(o) meta.push(chip(o.company));
+  if(a.due) meta.push('<span class="chip"'+(od?' style="background:var(--danger-weak);color:var(--danger);font-weight:650"':'')+'>'+ico('clock')+esc(dueLabel(a.due))+'</span>');
+  if(meta.length) h += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px">'+meta.join('')+'</div>';
+  if(a.note) h += '<div class="small muted" style="margin-top:3px">'+esc(a.note)+'</div>';
+  h += '</div>' + prioTag(a.priority) + statusTag2(a.status||'待开始');
+  h += '<button class="btn btn-xs" data-act="action-edit" data-id="'+esc(a.id)+'">'+ico('edit')+'</button>';
+  h += '<button class="btn btn-xs btn-danger" data-act="action-del" data-id="'+esc(a.id)+'">'+ico('trash')+'</button>';
+  return h + '</div>';
+}
+function contactRow(c){
+  var o = c.oppId ? findById('opportunities', c.oppId) : null;
+  var od = isOverdue(c.nextFollow);
+  var h = '<div class="act-row"><div class="act-main">' +
+    '<div class="act-t" style="font-size:12.5px;font-weight:620">'+esc(c.name||'')+(c.title?(' · '+esc(c.title)):'')+'</div>' +
+    '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px">' +
+      (c.relation?tag(c.relation,'#06aed4'):'') + (c.contact?chip(c.contact):'') + (o?chip(o.company):'') +
+      (c.nextFollow?('<span class="chip"'+(od?' style="background:var(--danger-weak);color:var(--danger);font-weight:650"':'')+'>跟进 '+esc(dueLabel(c.nextFollow))+'</span>'):'') +
+    '</div></div>';
+  h += '<button class="btn btn-xs" data-act="ct-edit" data-id="'+esc(c.id)+'">'+ico('edit')+'</button>' +
+       '<button class="btn btn-xs btn-danger" data-act="ct-del" data-id="'+esc(c.id)+'">'+ico('trash')+'</button>';
+  return h + '</div>';
+}
+
+/* =========================================================
+   V2：辅助标签 / 关联查询 / AI Copilot
+   ========================================================= */
+function gapTypeTag(t){
+  if(!t) return '';
+  var k = GAP_TYPE_KEY[t] || 'True';
+  return '<span class="type-tag gt-'+k+'">'+esc(t)+'</span>';
+}
+function strengthTag2(s){
+  if(!s) return '';
+  return '<span class="type-tag st-'+esc(s)+'">'+esc(s)+'</span>';
+}
+function contactsOf(oppId){ return listOf('contacts').filter(function(c){ return c.oppId === oppId; }); }
+function actionsOf(gapId){ return listOf('actions').filter(function(a){ return a.gapId === gapId; }); }
+function gapsOfOpp(oppId){ return listOf('gaps').filter(function(g){ return g.oppId === oppId; }); }
+function strategiesOfLesson(lid){ return listOf('strategies').filter(function(s){ return s.lessonId === lid; }); }
+function linkedOpps(company){ return allOpps().filter(function(o){ return o.company === company; }); }
+function goal(){
+  var g = (DB.meta && DB.meta.goal) ? DB.meta.goal : null;
+  if(!g || !g.text) return null;
+  return g;
+}
+
+function copilotBtn(scope, id, label){
+  return '<button class="btn btn-xs copilot-btn" data-act="copilot" data-scope="'+scope+'"'+(id?(' data-id="'+esc(id)+'"'):'')+'>'+ico('star')+esc(label)+'</button>';
+}
+
+function openCopilot(scope, id){
+  var p = buildCopilotPrompt(scope, id);
+  openModal({ title:'AI 辅助提示词生成 · 未调用大模型', wide:true,
+    body:'<div class="placeholder-note">'+ico('alert')+'<span>请先检查隐私。演示经历不代表真实业绩。把下面这段复制给任意 AI，再把它的回答填回工作台。<b>AI 只辅助判断，最终决定由你做。</b></span></div>' +
+      '<textarea id="copilotText" rows="18" style="font-size:12.5px;line-height:1.75">'+esc(p)+'</textarea>',
+    foot:'<button class="btn" data-act="close-modal">关闭</button>' +
+         '<button class="btn btn-primary" data-act="copy-copilot">'+ico('copy')+'复制提示词</button>' });
+}
+
+function buildCopilotPrompt(scope, id){
+  var o = id ? findById('opportunities', id) : null;
+  var evs = listOf('evidence');
+  var head = '你是我的求职 Copilot。只基于我下面给出的真实材料分析，不要编造经历。\n输出要具体、可执行，并明确区分「事实」与「你的推断」。\n\n';
+
+  if(scope === 'jd' && o){
+    return head + '【任务】拆解这份 JD。\n\n【岗位】'+o.company+' · '+(o.role||'')+' · '+(o.city||'')+' · '+(o.salary||'')+
+      '\n\n【JD 原文】\n'+(o.jd||'（未填写）')+
+      '\n\n请输出：\n1. 必备要求（Must-have）3-6 条，每条一句话\n2. 加分项（Nice-to-have）\n3. 这个岗位真正在考什么（3 条）\n4. 我的潜在风险点 / 会被挑战的地方\n5. 关键词清单（用于改简历）\n6. 结论：值得投 / 观望 / 不匹配，并说明原因';
+  }
+  if(scope === 'match' && o){
+    var evList = evs.map(function(e,i){
+      return (i+1)+'. ['+(e.type||'')+'/强度:'+(e.strength||'未评')+'] '+e.name+'\n   做了：'+(e.action||'')+'\n   结果：'+(e.result||'')+'\n   证明能力：'+(e.ability||'')+'\n   能力标签：'+(e.capabilityTags||'');
+    }).join('\n');
+    return head + '【任务】把 JD 要求和我的 Evidence 做匹配。\n\n【岗位】'+o.company+' · '+(o.role||'')+
+      '\n【JD 要求】\n'+((o.reqs||[]).map(function(r){ return '- '+(r.level||'')+' '+r.text; }).join('\n')||'（未拆解）')+
+      '\n\n【我的 Evidence 库】\n'+(evList||'（空）')+
+      '\n\n请对每条 JD 要求输出：\n- 最匹配的 Evidence 编号\n- 匹配强度 Strong/Medium/Weak\n- 理由（一句话）\n- 面试时该怎么讲（一句话）\n若没有任何 Evidence 能匹配，明确写「未匹配」，不要硬凑。';
+  }
+  if(scope === 'gap' && o){
+    var un = (o.reqs||[]).filter(function(r){ return !(o.matches||[]).some(function(m){ return m.reqId === r.id; }); });
+    return head + '【任务】判断缺口类型。\n\n【岗位】'+o.company+' · '+(o.role||'')+
+      '\n【未匹配的 JD 要求】\n'+(un.map(function(r){ return '- '+r.text; }).join('\n')||'（无）')+
+      '\n\n【我的 Evidence 库】\n'+(evs.map(function(e){ return '- '+e.name+'：'+(e.ability||''); }).join('\n')||'（空') +
+      '\n\n缺口类型只能四选一：\n- Presentation Gap：我其实具备，只是简历/表达没呈现\n- Weak Evidence：有相关经历但证据不足\n- Adjacent Skill：有相邻能力可迁移\n- True Gap：确实缺乏\n\n请对每条输出：类型 + 判断依据 + 最小成本的补法（不要一上来就建议我花半年学新东西）。';
+  }
+  if(scope === 'resume' && o){
+    var ms = (o.matches||[]).map(function(m){
+      var e = evs.filter(function(x){ return x.id === m.evId; })[0];
+      return e ? ('- ['+(m.strength||'中')+'] '+e.name+' | 做了：'+(e.action||'')+' | 结果：'+(e.result||'')) : null;
+    }).filter(Boolean).join('\n');
+    return head + '【任务】基于 Evidence 重写简历内容（不编造）。\n\n【目标岗位】'+o.company+' · '+(o.role||'')+
+      '\n【JD 关键要求】\n'+((o.reqs||[]).map(function(r){ return '- '+r.text; }).join('\n')||'（未拆解）')+
+      '\n\n【本岗位已匹配的 Evidence】\n'+(ms||'（尚未匹配）')+
+      '\n\n请输出：\n1. 一段 3 行的个人摘要（贴合该岗位）\n2. 4-6 条简历 bullet，每条：动词开头 + 做了什么 + 方法/工具 + 量化结果（结果只能来自上面的 Evidence）\n3. 哪些 JD 关键词应该出现但还没出现在我的内容里\n4. 明确列出你「建议我补充的信息」（不要替我编）';
+  }
+  if(scope === 'interview' && o){
+    var qs = listOf('questions').slice(0,10).map(function(q){ return '- '+q.question; }).join('\n');
+    return head + '【任务】为这场面试做针对性准备。\n\n【岗位】'+o.company+' · '+(o.role||'')+' · 当前阶段：'+o.status+
+      '\n【JD 要求】\n'+((o.reqs||[]).map(function(r){ return '- '+r.text; }).join('\n')||'（未拆解）')+
+      '\n\n【我的 Evidence】\n'+(evs.map(function(e){ return '- '+e.name+'（'+(e.strength||'未评')+'）：'+(e.result||''); }).join('\n')||'（空）')+
+      '\n\n【我以前被问过的问题】\n'+(qs||'（暂无）')+
+      '\n\n请输出：\n1. 这场面试最可能被问的 8 个问题（按 JD 定制，不要通用模板）\n2. 每个问题建议用哪条 Evidence 回答\n3. 3 个我该主动抛出的亮点\n4. 2 个我要提前想好的风险问题应对\n5. 我该反问的 3 个问题';
+  }
+  if(scope === 'feedback'){
+    var fbs = listOf('feedbacks').map(function(f){
+      var oo = findById('opportunities', f.oppId);
+      return '- ['+(f.date||'')+'] '+(oo?oo.company:'')+' / '+(f.channel||'')+'：'+(f.content||'');
+    }).join('\n');
+    return head + '【任务】从多条市场反馈里找共同模式。\n\n【我的全部反馈】\n'+(fbs||'（暂无反馈）')+
+      '\n\n【当前漏斗】\n'+funnelData().map(function(f){ return f.name+'：'+f.v; }).join(' / ')+
+      '\n\n请输出：\n1. 反复出现的信号（至少 2 条，要给出是哪几条反馈支撑的）\n2. 可以总结成的 Lesson（可迁移认知，2-3 条）\n3. 对应的 Strategy Update（我该调整什么策略）\n4. 接下来 1 周最该做的 3 个行动\n不要泛泛而谈，必须引用我上面的具体反馈。';
+  }
+  /* next */
+  var acts = pendingActions().slice(0,8).map(function(x){ return '- '+x.opp.company+'（'+x.opp.status+'/'+(x.opp.priority||'')+'）：'+x.opp.nextAction+' | 截止 '+dueLabel(x.due); }).join('\n');
+  return head + '【任务】帮我判断现在最值得做的下一步。\n\n【我的目标】'+((goal() && goal().text) || '（未设置）')+
+    '\n\n【漏斗】\n'+funnelData().map(function(f){ return f.name+'：'+f.v; }).join(' / ')+
+    '\n\n【进行中的 Next Action】\n'+(acts||'（无）')+
+    '\n\n【未完成的 Gap Action】\n'+(listOf('actions').filter(function(a){ return a.status!=='已完成'; }).map(function(a){ return '- '+a.title+' | 优先级 '+(a.priority||'')+' | '+dueLabel(a.due); }).join('\n')||'（无')+
+    '\n\n请输出：\n1. 现在最该做的 1 件事（唯一），及为什么（ROI 角度）\n2. 明确不该现在做的 2 件事\n3. 如果只能今天做 2 小时，怎么用\n只给判断，不要列一堆平铺选项。';
+}
+
+function viewTargets(){   return simpleView(CFGS.targets,   '目标岗位决定你收集 JD 的标准，也决定 Evidence 要怎么准备。'); }
+function viewResume(){    return simpleView(CFGS.resumes,   '简历不是从零写的，它是从 Evidence Bank 里挑出来的一组合。'); }
+
+/* ---- V2：带子 Tab 的三个模块 ---- */
+function subTabs(mod, tabs){
+  var cur = state.tab[mod] || tabs[0].k;
+  var h = '<div class="subtabs">';
+  tabs.forEach(function(t){
+    h += '<button class="subtab'+(cur===t.k?' active':'')+'" data-act="set-tab" data-m="'+mod+'" data-v="'+t.k+'">'+esc(t.t)+
+         '<span class="n">'+t.n+'</span></button>';
+  });
+  return h + '</div>';
+}
+function pageHead(title, desc, btn){
+  return '<div class="h-page"><div><h1 class="h-title">'+esc(title)+'</h1><div class="h-desc">'+esc(desc)+'</div></div>' +
+    '<div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">'+(btn||'')+'</div></div>';
+}
+
+function viewInterview(){
+  var t = state.tab.interview || 'iv';
+  var h = pageHead('面试中心', '面试记录 + 真实题库 + STAR 故事库，让下一次面试不再犯同样的错。',
+    t==='qb' ? '<button class="btn btn-primary" data-act="s-add" data-key="questions">'+ico('plus')+'新增问题</button>'
+   :(t==='sb' ? '<button class="btn btn-primary" data-act="s-add" data-key="stories">'+ico('plus')+'新增故事</button>'
+              : '<button class="btn btn-primary" data-act="iv-add2">'+ico('plus')+'新增面试记录</button>'));
+  h += subTabs('interview', [
+    { k:'iv', t:'面试记录与复盘', n:listOf('interviews').length },
+    { k:'qb', t:'Question Bank',  n:listOf('questions').length },
+    { k:'sb', t:'Story Bank',     n:listOf('stories').length }
+  ]);
+  if(t === 'qb') return h + '<div class="placeholder-note">'+ico('alert')+'<span>被问过的问题记下来，配合「更好的答法」反复练，便于复习；实际效果尚未验证。</span></div>' + simpleBody(CFGS.questions);
+  if(t === 'sb') return h + '<div class="placeholder-note">'+ico('alert')+'<span>Story 从 Evidence 沉淀而来：Evidence Bank 卡片上点「沉淀为 STAR Story」可直接生成。</span></div>' + simpleBody(CFGS.stories);
+  return h + '<div class="placeholder-note">'+ico('alert')+'<span>每场面试后填 Debrief：被问了什么、答得好/差、暴露的 Gap、新发现的 Evidence —— 这些会反向喂回证据库、Gap 与 Feedback。</span></div>' + simpleBody(CFGS.interviews);
+}
+
+function viewFeedback(){
+  var t = state.tab.feedback || 'fb';
+  var h = pageHead('反馈复盘', '市场反馈 → 形成认知 → 修改策略 → 下一步行动',
+    t==='ls' ? '<button class="btn btn-primary" data-act="s-add" data-key="lessons">'+ico('plus')+'新增 Lesson</button>'
+   :(t==='st' ? '<button class="btn btn-primary" data-act="s-add" data-key="strategies">'+ico('plus')+'新增 Strategy</button>'
+              : '<button class="btn btn-primary" data-act="fb-add2">'+ico('plus')+'新增反馈</button>'));
+  h += '<div class="chain" style="margin-bottom:10px"><i class="hi">Feedback 事实</i><span class="ar">→</span><i>Lesson 认知</i>' +
+       '<span class="ar">→</span><i>Strategy Update</i><span class="ar">→</span><i>Action</i></div>';
+  h += subTabs('feedback', [
+    { k:'fb', t:'Feedback 事实',  n:listOf('feedbacks').length },
+    { k:'ls', t:'Lesson 认知',    n:listOf('lessons').length },
+    { k:'st', t:'Strategy Update',n:listOf('strategies').length }
+  ]);
+  if(t === 'ls') return h + '<div class="placeholder-note">'+ico('alert')+'<span>Lesson 是「可迁移的认知」，不是流水账。判断标准：换一家公司、换一个面试官，这条还成立吗？</span></div>' + simpleBody(CFGS.lessons);
+  if(t === 'st') return h + '<div class="placeholder-note">'+ico('alert')+'<span>Strategy Update 写的是「以后我怎么做会不一样」，写不出来说明 Lesson 还没提炼透。</span></div>' + simpleBody(CFGS.strategies);
+  return h + '<div class="placeholder-note">'+ico('alert')+'<span>只记客观事实：对方说了什么、发生了什么。判断和认知放到 Lesson 里。</span></div>' + simpleBody(CFGS.feedbacks);
+}
+
+function viewGap(){
+  var t = state.tab.gap || 'gap';
+  var noAct = listOf('gaps').filter(function(g){ return !actionsOf(g.id).length; }).length;
+  var h = pageHead('Gap & Action', '缺口要分类，才知道该练能力还是改表达；每条 Gap 必须落到 Action。',
+    t==='act' ? '<button class="btn btn-primary" data-act="action-add">'+ico('plus')+'新增 Action</button>'
+              : '<button class="btn btn-primary" data-act="s-add" data-key="gaps">'+ico('plus')+'新增缺口</button>');
+  if(noAct) h += '<div class="placeholder-note" style="background:var(--danger-weak);border-color:var(--danger)">'+ico('alert')+
+    '<span style="color:var(--danger)"><b>有 '+noAct+' 条缺口还没有对应 Action。</b>缺口不落到行动，就只是焦虑。</span></div>';
+  h += subTabs('gap', [
+    { k:'gap', t:'能力缺口',   n:listOf('gaps').length },
+    { k:'act', t:'Action 清单',n:listOf('actions').length }
+  ]);
+  if(t === 'act') return h + actionListView();
+  h += '<div class="placeholder-note">'+ico('alert')+'<span>四种缺口：Presentation（有但没呈现）/ Weak Evidence（证据不足）/ Adjacent Skill（可迁移）/ True Gap（真缺）。前三种成本很低，先别急着去学新东西。</span></div>';
+  return h + simpleBody(CFGS.gaps);
+}
+
+function actionListView(){
+  var acts = listOf('actions');
+  if(!acts.length) return '<div class="card"><div class="empty">'+ico('inbox')+'<p>还没有 Action</p>' +
+    '<button class="btn btn-primary" data-act="action-add">'+ico('plus')+'新增 Action</button></div></div>';
+  var over  = acts.filter(function(a){ return a.status !== '已完成' && isOverdue(a.due); });
+  var doing = acts.filter(function(a){ return a.status === '进行中' && !isOverdue(a.due); });
+  var todo  = acts.filter(function(a){ return a.status !== '已完成' && a.status !== '进行中' && !isOverdue(a.due); });
+  var done  = acts.filter(function(a){ return a.status === '已完成'; });
+  function grp(title, arr, color){
+    if(!arr.length) return '';
+    return '<div class="card" style="margin-bottom:12px"><div class="sub-head" style="color:'+color+'">'+esc(title)+' · '+arr.length+'</div>' +
+      arr.map(function(a){ return actionRow(a, false); }).join('') + '</div>';
+  }
+  return grp('已逾期', over, 'var(--danger)') + grp('进行中', doing, 'var(--warn)') +
+         grp('待开始', todo, 'var(--text-3)') + grp('已完成', done, '#12b76a');
+}
+
+function viewResearch(){
+  var t = state.tab.research || 'co';
+  var h = pageHead('调研中心', '城市 → 行业 → 企业 → 业务/产品 → 部门 → 岗位，把「我了解你们」讲具体。',
+    t==='co' ? '<button class="btn btn-primary" data-act="s-add" data-key="companies">'+ico('plus')+'新建企业档案</button>'
+             : '<button class="btn btn-primary" data-act="s-add" data-key="research">'+ico('plus')+'新增调研资料</button>');
+  h += subTabs('research', [
+    { k:'co', t:'企业档案',   n:listOf('companies').length },
+    { k:'rs', t:'调研资料',   n:listOf('research').length }
+  ]);
+  if(t === 'co'){
+    h += '<div class="placeholder-note">'+ico('alert')+'<span>一份企业档案 = 6 个问题：它在哪个城市/行业？靠什么赚钱？卖什么产品？我要进哪个部门/岗位？我值不值得投？</span></div>';
+    return h + marketPathView() + simpleBody(CFGS.companies);
+  }
+  return h + '<div class="placeholder-note">'+ico('alert')+'<span>调研资料是弹药：行业趋势、年报要点、技术栈、人脉线索，面试时能随口引用。</span></div>' + simpleBody(CFGS.research);
+}
+
+function marketPathView(){
+  var cos = listOf('companies');
+  if(!cos.length) return '';
+  var byCity = {}, order = [];
+  cos.forEach(function(c){
+    var k = c.city || '未填城市';
+    if(!byCity[k]){ byCity[k] = {}; order.push(k); }
+    var ik = c.industry || '未填行业';
+    if(!byCity[k][ik]) byCity[k][ik] = [];
+    byCity[k][ik].push(c);
+  });
+  var h = '<div class="card" style="margin-bottom:12px"><div class="sub-head">市场路径 · 城市 → 行业 → 企业</div>';
+  order.forEach(function(city){
+    h += '<div class="mp-city">'+ico('target')+esc(city)+'</div>';
+    Object.keys(byCity[city]).forEach(function(ind){
+      h += '<div class="mp-ind">'+esc(ind)+'</div><div class="mp-co">';
+      byCity[city][ind].forEach(function(c){
+        var n = linkedOpps(c.name).length;
+        h += '<button class="btn btn-xs" data-act="s-edit" data-key="companies" data-id="'+esc(c.id)+'">'+esc(c.name)+(n?(' · '+n+' 个岗位'):'')+'</button>';
+      });
+      h += '</div>';
+    });
+  });
+  return h + '</div>';
+}
+
+function simpleBody(cfg){
+  var items = listOf(cfg.key);
+  if(!items.length) return '<div class="card"><div class="empty">'+ico('inbox')+'<p>暂无记录</p>' +
+    '<button class="btn btn-primary" data-act="s-add" data-key="'+cfg.key+'">'+ico('plus')+'新增一条</button></div></div>';
+  var h = '<div class="grid '+(cfg.cols||'grid-2')+'">';
+  items.forEach(function(it){ h += cfg.card(it); });
+  return h + '</div>';
+}
+
+function simpleView(cfg, note){
+  var h = '<div class="h-page"><div><h1 class="h-title">'+esc(cfg.title)+'</h1><div class="h-desc">'+esc(cfg.desc)+'</div></div>' +
+    '<div style="margin-left:auto"><button class="btn btn-primary" data-act="s-add" data-key="'+cfg.key+'">'+ico('plus')+'新增</button></div></div>';
+  h += '<div class="placeholder-note">'+ico('alert')+'<span>'+esc(note)+'</span></div>';
+  return h + simpleBody(cfg);
+}
+
+function simpleForm(cfg, item){
+  var body = '';
+  cfg.fields.forEach(function(f){
+    var v = item ? item[f.k] : '';
+    if(f.type === 'area') body += fArea(f.label, f.k, v, { rows:f.rows||3, ph:f.ph });
+    else if(f.type === 'select'){
+      var opts = f.opts || [];
+      if(f.dyn) opts = dynOpts(f.dyn);
+      body += fSelect(f.label, f.k, v, opts);
+    }
+    else if(f.type === 'date') body += fInput(f.label, f.k, v, { type:'date' });
+    else body += fInput(f.label, f.k, v, { ph:f.ph });
+  });
+  openModal({ title:(item?'编辑':'新增') + cfg.title.replace(/库|中心/g,''),
+    body:body,
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="s-save" data-key="'+cfg.key+'"'+(item?(' data-id="'+esc(item.id)+'"'):'')+'>保存</button>' });
+}
+
+/* =========================================================
+   表单：岗位 / 证据 / 要求 / 匹配 / 面试 / 反馈 / Next Action
+   ========================================================= */
+function oppForm(o){
+  o = o || {};
+  var rs = listOf('resumes');
+  var body =
+    fRow(fInput('公司 *','company',o.company,{ph:'例：联影医疗'}), fInput('岗位名称 *','role',o.role,{ph:'例：临床数据科学家'})) +
+    fRow(fInput('岗位方向','direction',o.direction,{ph:'例：AI 医疗 / 真实世界研究'}), fInput('城市','city',o.city,{ph:'上海'})) +
+    fRow(fInput('薪资','salary',o.salary,{ph:'40-60K'}), fInput('来源','source',o.source,{ph:'官网 / 猎头 / BOSS / 内推'})) +
+    fRow3(fSelect('优先级','priority',o.priority,PRIORITIES), fSelect('状态','status',o.status||'收藏',STATUS_ALL,{empty:''}), fInput('联系人','contact',o.contact,{ph:'HR 姓名 / 微信'})) +
+    fRow(fSelect('使用简历版本','resumeVersion',o.resumeVersion, rs.map(function(r){ return r.name; })), fInput('投递日期','appliedDate',o.appliedDate,{type:'date'})) +
+    fArea('JD 原文','jd',o.jd,{rows:6,ph:'把招聘启事原文整段粘进来'}) +
+    fRow(fArea('Next Action','nextAction',o.nextAction,{rows:2,ph:'下一步具体要做什么'}), fInput('截止日期','nextDue',o.nextDue,{type:'date'})) +
+    fInput('最终结果','result',o.result,{ph:'Offer / Rejected / 薪资 / 未通过原因'});
+  openModal({ title:o.id?'编辑岗位':'新建岗位', wide:true, body:body,
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="opp-save"'+(o.id?(' data-id="'+esc(o.id)+'"'):'')+'>保存</button>' });
+}
+
+function evForm(e){
+  e = e || {};
+  var body =
+    fRow(fInput('证据名称 *','name',e.name,{ph:'例：用 NLP 从 3 万份病历中抽取终点事件'}), fInput('经历类别','category',e.category,{ph:'例：临床研究 / 数据分析项目'})) +
+    fSelect('Evidence 类型','type',e.type,EV_TYPES) +
+    fArea('背景 / 问题','background',e.background,{rows:2,ph:'当时要解决什么问题？为什么重要？'}) +
+    fArea('我具体做了什么','action',e.action,{rows:3,ph:'动作 + 方法 + 工具，写具体'}) +
+    fRow(fSelect('Evidence 强度','strength',e.strength,EV_STRENGTHS,{empty:''}), fInput('能力标签','capabilityTags',e.capabilityTags,{ph:'逗号分隔：临床数据建模, 跨部门推动'})) +
+    fArea('结果','result',e.result,{rows:2,ph:'最好带数字：效率提升 40%、覆盖 12 家医院'}) +
+    fArea('量化结果（数字口径）','metric',e.metric,{rows:1,ph:'例：4 个月 → 3 周；一致率 92%；重复扫描 -31%'}) +
+    fArea('可以证明什么能力','ability',e.ability,{rows:2,ph:'例：复杂数据建模 + 跨部门推动'}) +
+    fArea('Supporting Material / Proof','proof',e.proof,{rows:2,ph:'论文链接、截图、代码仓库、内部报告、推荐人'}) +
+    fArea('Resume Bullet（直接能进简历的那句话）','resumeBullet',e.resumeBullet,{rows:2,ph:'动词开头 + 做了什么 + 方法 + 量化结果'}) +
+    fArea('可以回答哪些面试问题','answerQuestions',e.answerQuestions,{rows:2,ph:'例：讲一次你推动跨部门的项目 / 模型效果不好你怎么处理'}) +
+    fArea('STAR 故事','story',e.story,{rows:4,ph:'Situation / Task / Action / Result，面试口径版本'}) +
+    fInput('适合哪些目标岗位','tags',e.tags,{ph:'例：临床数据科学家, 医疗AI产品经理'});
+  openModal({ title:e.id?'编辑证据':'新增证据', wide:true, body:body,
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="ev-save"'+(e.id?(' data-id="'+esc(e.id)+'"'):'')+'>保存</button>' });
+}
+
+function reqForm(o, r){
+  r = r || {};
+  openModal({ title:r.id?'编辑要求':'添加 JD 要求',
+    body: fArea('要求内容','text',r.text,{rows:2,ph:'例：3 年以上医学影像数据分析经验'}) +
+          fSelect('性质','level',r.level||'必备',['必备','加分']) +
+          fArea('补充说明','note',r.note,{rows:2}),
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="req-save" data-id="'+esc(o.id)+'"'+(r.id?(' data-rid="'+esc(r.id)+'"'):'')+'>保存</button>' });
+}
+
+function matchForm(o, m){
+  m = m || {};
+  var evs = listOf('evidence');
+  var body = fSelect('对应 JD 要求','reqId',m.reqId, (o.reqs||[]).map(function(r){ return { v:r.id, t:(r.level||'')+' · '+r.text }; }), {empty:'— 选择要求 —'}) +
+    fSelect('我的 Evidence','evId',m.evId, evs.map(function(e){ return { v:e.id, t:(e.type||'')+' · '+e.name }; }), {empty:'— 选择证据 —'}) +
+    fSelect('匹配强度','strength',m.strength||'中',STRENGTHS,{empty:''}) +
+    fArea('说明 / 面试怎么讲','note',m.note,{rows:2});
+  openModal({ title:m.id?'编辑匹配':'匹配证据', body:body,
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="match-save" data-id="'+esc(o.id)+'"'+(m.id?(' data-mid="'+esc(m.id)+'"'):'')+'>保存</button>' });
+}
+
+function ivForm(iv){
+  iv = iv || {};
+  openModal({ title:iv.id?'编辑面试记录 / 复盘':'添加面试记录', wide:true,
+    body: fSelect('关联岗位','oppId',iv.oppId, allOpps().map(function(o){ return { v:o.id, t:o.company+' · '+(o.role||'') }; })) +
+          fRow(fSelect('轮次','round',iv.round,INTERVIEW_ROUNDS,{empty:''}), fInput('日期','date',iv.date,{type:'date'})) +
+          fRow(fSelect('形式','type',iv.type,['现场','视频','电话','笔试','其他'],{empty:''}), fInput('面试官','interviewer',iv.interviewer)) +
+          fSelect('结果','result',iv.result,['未出','通过','未通过','待定'],{empty:''}) +
+          fArea('面试记录','notes',iv.notes,{rows:4,ph:'问了什么、我怎么答的、哪里卡住了'}) +
+          '<div class="divider"></div><div class="sub-head" style="margin-bottom:8px">INTERVIEW DEBRIEF · 复盘（会反向喂回证据库 / Gap / Feedback）</div>' +
+          fArea('被问了什么','asked',iv.asked,{rows:2,ph:'原话记下来，越具体越好'}) +
+          fArea('我当时怎么答的','myAnswer',iv.myAnswer,{rows:3}) +
+          fRow(fArea('答得好的地方','wentWell',iv.wentWell,{rows:2}), fArea('答得差 / 卡住的地方','wentBad',iv.wentBad,{rows:2})) +
+          fRow(fArea('暴露出的 Gap','gapFound',iv.gapFound,{rows:2}), fArea('新发现的 Evidence','newEvidence',iv.newEvidence,{rows:2})) +
+          fRow(fArea('可以形成的 Lesson','lessonNote',iv.lessonNote,{rows:2}), fArea('下一步 Action','nextAction',iv.nextAction,{rows:2})) +
+          fArea('面试后待办','todo',iv.todo,{rows:2}),
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="iv-save" data-iv="'+(iv.id||'')+'">保存</button>' });
+}
+
+function contactForm(c){
+  c = c || {};
+  openModal({ title:c.id?'编辑联系人':'添加联系人',
+    body: fRow(fInput('姓名 *','name',c.name,{ph:'张三'}), fInput('公司','company',c.company,{ph:'联影医疗'})) +
+          fRow(fInput('职位','title',c.title,{ph:'HR / 临床总监'}), fSelect('与我的关系','relation',c.relation,CONTACT_TYPES,{empty:''})) +
+          fRow(fInput('联系方式','contact',c.contact,{ph:'微信 / 邮箱 / 电话'}),
+               fSelect('对应 Opportunity','oppId',c.oppId, allOpps().map(function(o){ return { v:o.id, t:o.company+' · '+(o.role||'') }; }))) +
+          fRow(fInput('最近联系','lastContact',c.lastContact,{type:'date'}), fInput('Next Follow-up','nextFollow',c.nextFollow,{type:'date'})) +
+          fArea('备注','note',c.note,{rows:2,ph:'聊了什么、对方在意什么、下次怎么开口'}),
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="ct-save"'+(c.id?(' data-id="'+esc(c.id)+'"'):'')+'>保存</button>' });
+}
+
+function actionForm(a){
+  a = a || {};
+  openModal({ title:a.id?'编辑 Action':'新增 Action',
+    body: fArea('Action 内容 *','title',a.title,{rows:2,ph:'一句话、可执行、有产出'}) +
+          fRow(fSelect('对应 Gap','gapId',a.gapId, dynOpts('gaps'),{empty:'— 可不选 —'}),
+               fSelect('对应 Opportunity','oppId',a.oppId, dynOpts('opps'),{empty:'— 可不选 —'})) +
+          fRow3(fSelect('优先级','priority',a.priority||'P1',PRIORITIES), fInput('截止日期','due',a.due||shiftDays(todayStr(),7),{type:'date'}),
+                fSelect('状态','status',a.status||'待开始',ACTION_STATUS)) +
+          fArea('备注 / 产出标准','note',a.note,{rows:2,ph:'做到什么程度算完成？'}),
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="action-save"'+(a.id?(' data-id="'+esc(a.id)+'"'):'')+'>保存</button>' });
+}
+
+function fbForm(fb){
+  fb = fb || {};
+  openModal({ title:fb.id?'编辑反馈':'添加反馈复盘',
+    body: fSelect('关联岗位','oppId',fb.oppId, allOpps().map(function(o){ return { v:o.id, t:o.company+' · '+(o.role||'') }; })) +
+          fRow(fInput('日期','date',fb.date||todayStr(),{type:'date'}), fSelect('来源','channel',fb.channel,['HR','面试官','猎头','内推人','邮件拒信','自我复盘','其他'],{empty:''})) +
+          fArea('反馈原文 / 事实','content',fb.content,{rows:4}) +
+          fArea('我得到的教训','lesson',fb.lesson,{rows:2}) +
+          fArea('转化成的下一步行动','action',fb.action,{rows:2}),
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="fb-save" data-fb="'+(fb.id||'')+'">保存</button>' });
+}
+
+function nextActionForm(o){
+  openModal({ title:'设置 Next Action · '+o.company,
+    body: fArea('下一步要做什么','act',o.nextAction,{rows:3,ph:'一句话、可执行、有产出'}) +
+          fInput('截止日期','due',o.nextDue,{type:'date'}) +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:-4px">' +
+            '<button class="btn btn-xs" data-act="set-due" data-id="'+esc(o.id)+'" data-d="0">今天</button>' +
+            '<button class="btn btn-xs" data-act="set-due" data-id="'+esc(o.id)+'" data-d="1">明天</button>' +
+            '<button class="btn btn-xs" data-act="set-due" data-id="'+esc(o.id)+'" data-d="3">3 天后</button>' +
+            '<button class="btn btn-xs" data-act="set-due" data-id="'+esc(o.id)+'" data-d="7">一周后</button></div>',
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="na-save" data-id="'+esc(o.id)+'">保存</button>' });
+}
+
+function resumeForm(r){
+  r = r || {};
+  openModal({ title:r.id?'编辑简历版本':'新建简历版本',
+    body: fRow(fInput('版本名称 *','name',r.name,{ph:'例：V3 - AI医疗方向'}), fInput('目标岗位/方向','targetRole',r.targetRole)) +
+          fInput('版本号 / 日期','version',r.version,{ph:'2026-09'}) +
+          fArea('简历摘要 / 个人定位','summary',r.summary,{rows:4}) +
+          fArea('备注','notes',r.notes,{rows:2,ph:'改了什么、投给谁、效果如何'}),
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="resume-save" data-id="'+(r.id||'')+'">保存</button>' });
+}
+
+function pickEvidenceForm(r){
+  var evs = listOf('evidence'), ids = r.evidenceIds || [];
+  if(!evs.length){ toast('证据库还是空的，先去 Evidence Bank 加几条'); return; }
+  var body = '<div class="small muted" style="margin-bottom:9px">勾选要放进这版简历的 Evidence（可多选）</div>';
+  evs.forEach(function(e){
+    body += '<label style="display:flex;gap:9px;align-items:flex-start;padding:8px;border:1px solid var(--border);border-radius:7px;margin-bottom:7px;cursor:pointer">' +
+      '<input type="checkbox" name="evpick" value="'+esc(e.id)+'"'+(ids.indexOf(e.id)>=0?' checked':'')+' style="width:17px;height:17px;margin-top:2px;flex:0 0 17px">' +
+      '<span style="flex:1;min-width:0"><span style="font-size:13px;font-weight:600">'+esc(e.name)+'</span>' +
+      '<span class="small muted" style="display:block">'+esc(e.type||'')+(e.result?(' · '+esc(e.result)):'')+'</span></span></label>';
+  });
+  openModal({ title:'为「'+r.name+'」勾选 Evidence', body:body,
+    foot:'<button class="btn" data-act="close-modal">取消</button>' +
+         '<button class="btn btn-primary" data-act="pick-save" data-id="'+esc(r.id)+'">保存</button>' });
+}
+
+/* =========================================================
+   事件层：所有交互 → 改数据 → refreshAll()（渲染函数之间不互相调用）
+   ========================================================= */
+function bindGlobal(){
+  document.addEventListener('click', function(e){
+    if(!e.target || !e.target.closest) return;
+    var el = e.target.closest('[data-act]');
+    if(!el) return;
+    var act = el.getAttribute('data-act');
+    var id  = el.getAttribute('data-id');
+    var o   = id ? findById('opportunities', id) : null;
+
+    if(/-del$/.test(act) && !el.dataset.confirmed){confirmBox('确认删除','删除后可用顶部“撤销上次修改”恢复最近一次修改。继续？',function(){el.dataset.confirmed='yes';el.click();delete el.dataset.confirmed;});return;}
+    if(act === 'mask'){ if(e.target === el) closeModal(); return; }
+
+    switch(act){
+      /* --- 导航 / 全局 --- */
+      case 'save-contribution': DB.meta.contribution=document.getElementById('contribution').value;saveAll();toast('已保存');return;
+      case 'switch-mode': location.search=IS_DEMO?'?mode=personal':'?mode=demo';return;
+      case 'undo': if(!undoSnapshot){toast('没有可撤销的修改');return;}var previous=undoSnapshot;DB=JSON.parse(previous);saveAll();undoSnapshot=null;state.selOpp=null;refreshAll();toast('已撤销上次修改');return;
+      case 'demo-reset': if(IS_DEMO)confirmBox('重置演示','将替换当前 Demo 修改；个人数据不受影响。建议先备份。',function(){seedDemo();saveAll();state.selOpp=null;refreshAll();toast('演示已重置');});return;
+      case 'nav':
+        state.view = el.getAttribute('data-view'); state.selOpp = null; refreshAll(); return;
+      case 'close-modal': closeModal(); return;
+      case 'confirm-yes': closeModal(); if(_pendingConfirm){ var f=_pendingConfirm; _pendingConfirm=null; f(); } return;
+      case 'export-json': exportJSON(); return;
+      case 'import-json': document.getElementById('fileInput').click(); return;
+      case 'reset-data':
+        confirmBox('清空数据','将清空<b>全部</b>岗位、证据、面试与反馈记录（不可恢复）。建议先导出备份。确认继续？', function(){
+          STORES.forEach(function(k){ if(k!=='meta') DB[k] = { items:[] }; });
+          DB.meta.seeded = true; state.selOpp = null; saveAll(); refreshAll(); toast('已清空，可开始录入真实数据');
+        }); return;
+      case 'back-list': state.selOpp = null; refreshAll(); return;
+      case 'toggle-sec': {
+        var k = el.getAttribute('data-key');
+        state.collapsed[k] = !state.collapsed[k]; refreshAll(); return;
+      }
+      case 'quick-add': case 'opp-new': oppForm(null); return;
+
+      /* --- 岗位 --- */
+      case 'open-opp': state.selOpp = id; state.view = 'opps'; refreshAll(); return;
+      case 'opp-edit': if(o) oppForm(o); return;
+      case 'opp-del':
+        if(o) confirmBox('删除岗位','确定删除「'+esc(o.company)+' · '+esc(o.role||'')+'」？相关面试与反馈记录会保留但失去关联。', function(){
+          removeItem('opportunities', id); if(state.selOpp===id) state.selOpp=null; refreshAll(); toast('已删除');
+        }); return;
+      case 'opp-save': {
+        var d = readForm();
+        if(!d.company || !d.role){ toast('请填写公司名称和岗位名称'); return; }
+        if(id){ updateItem('opportunities', id, d); }
+        else { var n = addItem('opportunities', {
+          company:d.company, role:d.role, direction:d.direction, city:d.city, salary:d.salary, jd:d.jd,
+          source:d.source, priority:d.priority, status:d.status||'收藏', contact:d.contact,
+          resumeVersion:d.resumeVersion, appliedDate:d.appliedDate, nextAction:d.nextAction,
+          nextDue:d.nextDue, result:d.result, reqs:[], matches:[]
+        }); state.selOpp = n.id; state.view = 'opps'; }
+        closeModal(); refreshAll(); toast('已保存'); return;
+      }
+      case 'edit-jd':
+        if(o) openModal({ title:'JD 原文 · '+o.company, wide:true,
+          body: fArea('JD 原文','jd',o.jd,{rows:16,ph:'整段粘贴招聘启事'}),
+          foot:'<button class="btn" data-act="close-modal">取消</button><button class="btn btn-primary" data-act="jd-save" data-id="'+esc(id)+'">保存</button>' }); return;
+      case 'jd-save': {
+        var jd = readForm().jd;
+        updateItem('opportunities', id, { jd:jd }); closeModal(); refreshAll(); toast('JD 已保存'); return;
+      }
+
+      /* --- JD 要求拆解 --- */
+      case 'req-add': if(o) reqForm(o, null); return;
+      case 'req-edit': {
+        var rid = el.getAttribute('data-rid');
+        var r = (o.reqs||[]).filter(function(x){ return x.id === rid; })[0];
+        if(o && r) reqForm(o, r); return;
+      }
+      case 'req-save': {
+        var fd = readForm();
+        if(!fd.text){ toast('请填写要求内容'); return; }
+        var arr = (o.reqs || []).slice();
+        var rid2 = el.getAttribute('data-rid');
+        if(rid2){ for(var i=0;i<arr.length;i++){ if(arr[i].id===rid2){ arr[i] = { id:rid2, text:fd.text, level:fd.level, note:fd.note }; } } }
+        else arr.push({ id:uid(), text:fd.text, level:fd.level||'必备', note:fd.note });
+        updateItem('opportunities', id, { reqs:arr }); closeModal(); refreshAll(); return;
+      }
+      case 'req-del': {
+        var rid3 = el.getAttribute('data-rid');
+        updateItem('opportunities', id, {
+          reqs:(o.reqs||[]).filter(function(x){ return x.id !== rid3; }),
+          matches:(o.matches||[]).filter(function(x){ return x.reqId !== rid3; })
+        }); refreshAll(); return;
+      }
+      case 'req-bulk': {
+        var lines = String(o.jd||'').split(/\n+/).map(function(s){ return s.replace(/^[\s\-•·*\d.、]+/,'').trim(); })
+          .filter(function(s){ return s.length >= 5 && s.length <= 80; }).slice(0, 12);
+        if(!lines.length){ toast('JD 里没找到可拆的行'); return; }
+        var nr = lines.map(function(s){
+          return { id:uid(), text:s, level:(/优先|加分|plus|熟悉.*更佳/i.test(s) ? '加分' : '必备'), note:'' };
+        });
+        updateItem('opportunities', id, { reqs:(o.reqs||[]).concat(nr) }); refreshAll(); toast('已导入 '+nr.length+' 条要求，请手动删掉无用项'); return;
+      }
+
+      /* --- 匹配 --- */
+      case 'match-add': if(o) matchForm(o, { reqId: el.getAttribute('data-rid') }); return;
+      case 'match-edit': {
+        var mid = el.getAttribute('data-mid');
+        var m = (o.matches||[]).filter(function(x){ return x.id === mid; })[0];
+        if(o && m) matchForm(o, m); return;
+      }
+      case 'match-save': {
+        var mfd = readForm();
+        if(!mfd.evId){ toast('请选择一条 Evidence'); return; }
+        var marr = (o.matches || []).slice();
+        var mid2 = el.getAttribute('data-mid');
+        if(mid2){ for(var j=0;j<marr.length;j++){ if(marr[j].id===mid2){ marr[j] = { id:mid2, reqId:mfd.reqId, evId:mfd.evId, strength:mfd.strength, note:mfd.note }; } } }
+        else marr.push({ id:uid(), reqId:mfd.reqId, evId:mfd.evId, strength:mfd.strength||'中', note:mfd.note });
+        updateItem('opportunities', id, { matches:marr }); closeModal(); refreshAll(); return;
+      }
+      case 'match-del': {
+        var mid3 = el.getAttribute('data-mid');
+        updateItem('opportunities', id, { matches:(o.matches||[]).filter(function(x){ return x.id !== mid3; }) }); refreshAll(); return;
+      }
+      case 'gap-from-req': {
+        var rid4 = el.getAttribute('data-rid');
+        var rq = (o.reqs||[]).filter(function(x){ return x.id === rid4; })[0];
+        if(rq) addItem('gaps', { title:'缺少：'+rq.text, gapType:'True Gap', oppId:id, category:'硬技能',
+          source:o.company+' · JD 未匹配', severity:'高',
+          action:'判断是「没做」还是「做了没写」——先补一段能证明「'+rq.text+'」的经历或作品',
+          due:shiftDays(todayStr(),14), status:'待开始' });
+        toast('已转入「能力缺口与行动」'); refreshAll(); return;
+      }
+      case 'copy-match': {
+        var evs2 = listOf('evidence');
+        var txt = ['【'+o.company+' · '+(o.role||'')+'】证据匹配摘要'];
+        (o.reqs||[]).forEach(function(r){
+          var ms = (o.matches||[]).filter(function(x){ return x.reqId === r.id; });
+          txt.push('· '+(r.level||'')+' '+r.text);
+          if(!ms.length) txt.push('    → 未匹配（缺口）');
+          ms.forEach(function(m){
+            var ev = evs2.filter(function(x){ return x.id === m.evId; })[0];
+            txt.push('    → ['+(m.strength||'中')+'] '+(ev?ev.name:'已删除')+(m.note?(' — '+m.note):''));
+          });
+        });
+        copyText(txt.join('\n')); return;
+      }
+
+      /* --- 状态推进 --- */
+      case 'mark-applied': {
+        var patch = { appliedDate: todayStr() };
+        if(stageIdx(o.status) < 3) patch.status = '已投递';
+        updateItem('opportunities', id, patch); refreshAll(); toast('已标记为今日投递'); return;
+      }
+      case 'next-stage': {
+        var i2 = stageIdx(o.status);
+        if(i2 < 0){ toast('当前是终态（'+o.status+'），请手动改状态'); return; }
+        if(i2 >= STATUS_FLOW.length-1){ toast('已经是 Offer 了'); return; }
+        updateItem('opportunities', id, { status: STATUS_FLOW[i2+1] }); refreshAll(); toast('已推进到 '+STATUS_FLOW[i2+1]); return;
+      }
+      case 'next-edit': if(o) nextActionForm(o); return;
+      case 'na-save': {
+        var nd = readForm();
+        updateItem('opportunities', id, { nextAction:nd.act, nextDue:nd.due }); closeModal(); refreshAll(); toast('Next Action 已更新'); return;
+      }
+      case 'next-save': {
+        var a = document.getElementById('na_act'), d2 = document.getElementById('na_due');
+        updateItem('opportunities', id, { nextAction:a?a.value:'', nextDue:d2?d2.value:'' }); refreshAll(); toast('Next Action 已保存'); return;
+      }
+      case 'set-due': {
+        var dd = parseInt(el.getAttribute('data-d'), 10) || 0;
+        updateItem('opportunities', id, { nextDue: shiftDays(todayStr(), dd) }); refreshAll(); return;
+      }
+      case 'done-next':
+        updateItem('opportunities', id, { nextAction:'', nextDue:'' });
+        refreshAll(); if(o) nextActionForm(findById('opportunities', id));
+        toast('已完成，设置下一个 Next Action'); return;
+
+      /* --- 简历 --- */
+      case 'resume-new': resumeForm(null); return;
+      case 'resume-save': {
+        var rd = readForm();
+        if(!rd.name){ toast('请填写版本名称'); return; }
+        var rid5 = el.getAttribute('data-id');
+        if(rid5) updateItem('resumes', rid5, { name:rd.name, targetRole:rd.targetRole, version:rd.version, summary:rd.summary, notes:rd.notes });
+        else addItem('resumes', { name:rd.name, targetRole:rd.targetRole, version:rd.version, summary:rd.summary, notes:rd.notes, evidenceIds:[] });
+        closeModal(); refreshAll(); toast('已保存'); return;
+      }
+      case 'resume-pick': {
+        var r2 = findById('resumes', id);
+        if(r2) pickEvidenceForm(r2); return;
+      }
+      case 'pick-save': {
+        var picks = [];
+        var boxes = document.querySelectorAll('#modalRoot input[name=evpick]');
+        for(var p=0;p<boxes.length;p++){ if(boxes[p].checked) picks.push(boxes[p].value); }
+        updateItem('resumes', id, { evidenceIds: picks }); closeModal(); refreshAll(); toast('已挂载 '+picks.length+' 条 Evidence'); return;
+      }
+
+      /* --- 面试 / 反馈 --- */
+      case 'iv-add': if(o) ivForm({ oppId:id, date:todayStr() }); return;
+      case 'iv-edit': { var iv = findById('interviews', el.getAttribute('data-iv')); if(iv) ivForm(iv); return; }
+      case 'iv-save': {
+        var idata = readForm(); if(!idata.oppId || !idata.round || !idata.date){toast('请选择岗位、轮次和日期');return;} var ivid = el.getAttribute('data-iv');
+        if(ivid) updateItem('interviews', ivid, idata); else addItem('interviews', idata);
+        closeModal(); refreshAll(); toast('面试记录已保存'); return;
+      }
+      case 'iv-del': removeItem('interviews', el.getAttribute('data-iv')); refreshAll(); return;
+      case 'fb-add': if(o) fbForm({ oppId:id, date:todayStr() }); return;
+      case 'fb-edit': { var fb2 = findById('feedbacks', el.getAttribute('data-fb')); if(fb2) fbForm(fb2); return; }
+      case 'fb-save': {
+        var fdata = readForm(); if(!fdata.oppId || !fdata.content){toast('请选择岗位并填写反馈事实');return;} var fbid = el.getAttribute('data-fb');
+        if(fbid) updateItem('feedbacks', fbid, fdata); else addItem('feedbacks', fdata);
+        closeModal(); refreshAll(); toast('反馈已保存'); return;
+      }
+      case 'fb-del': removeItem('feedbacks', el.getAttribute('data-fb')); refreshAll(); return;
+      case 'gap-from-fb': {
+        var fb3 = findById('feedbacks', el.getAttribute('data-fb'));
+        if(fb3){
+          var oo = findById('opportunities', fb3.oppId);
+          addItem('gaps', { title: fb3.lesson || ('待改进：'+(fb3.content||'').slice(0,20)), gapType:'Presentation Gap', oppId: fb3.oppId || '',
+            category:'表达与面试', source:(oo?oo.company:'')+' · '+(fb3.channel||'反馈'), severity:'中',
+            action: fb3.action || '针对该反馈准备新的说法并模拟一遍', due: shiftDays(todayStr(),7), status:'待开始' });
+          toast('已转入「能力缺口与行动」'); refreshAll();
+        } return;
+      }
+
+      /* --- Evidence --- */
+      case 'ev-new': evForm(null); return;
+      case 'ev-edit': { var ev3 = findById('evidence', id); if(ev3) evForm(ev3); return; }
+      case 'ev-save': {
+        var ed = readForm();
+        if(!ed.name){ toast('请填写证据名称'); return; }
+        if(id) updateItem('evidence', id, ed); else addItem('evidence', ed);
+        closeModal(); refreshAll(); toast('证据已保存'); return;
+      }
+      case 'ev-del':
+        confirmBox('删除证据','确定删除这条 Evidence？已引用它的岗位匹配会显示为「证据已删除」。', function(){
+          removeItem('evidence', id); refreshAll(); toast('已删除');
+        }); return;
+
+      /* --- 通用模块 --- */
+      case 's-add': simpleForm(CFGS[el.getAttribute('data-key')], null); return;
+      case 's-edit': simpleForm(CFGS[el.getAttribute('data-key')], findById(el.getAttribute('data-key'), el.getAttribute('data-id'))); return;
+      case 's-del': {
+        var k2 = el.getAttribute('data-key'), id2 = el.getAttribute('data-id');
+        removeItem(k2, id2); refreshAll(); toast('已删除'); return;
+      }
+      case 's-save': {
+        var k3 = el.getAttribute('data-key'), id3 = el.getAttribute('data-id'), sd = readForm();
+        var nid = id3;
+        if(id3) updateItem(k3, id3, sd); else { var nn = addItem(k3, sd); nid = nn.id; }
+        if(k3 === 'lessons' && _pendingLessonFb){
+          updateItem('feedbacks', _pendingLessonFb, { lessonId: nid }); _pendingLessonFb = null;
+        }
+        if(k3 === 'strategies' && _pendingStrategyLesson && !sd.lessonId){
+          updateItem('strategies', nid, { lessonId: _pendingStrategyLesson }); _pendingStrategyLesson = null;
+        }
+        closeModal(); refreshAll(); toast('已保存'); return;
+      }
+      /* --- V2：子 Tab / 目标 / Copilot --- */
+      case 'set-tab': {
+        var m = el.getAttribute('data-m'), v = el.getAttribute('data-v');
+        state.tab[m] = v; refreshAll(); return;
+      }
+      case 'goal-edit': {
+        var g0 = goal();
+        openModal({ title:'设置求职目标 · Outcome Goal',
+          body: fArea('Outcome Goal','gtext', g0?g0.text:'', {rows:2, ph:'例：3 个月内拿到上海/杭州 AI 医疗方向 40K+ 的 Offer'}) +
+                fRow(fInput('目标城市','gcity', g0?g0.city:'', {ph:'上海 / 杭州'}), fInput('目标薪资','gsalary', g0?g0.salary:'', {ph:'40-60K'})) +
+                fRow(fInput('截止日期','gdeadline', g0?g0.deadline:'', {type:'date'}), fInput('每周投入','gweekly', g0?g0.weekly:'', {ph:'例：10 小时 / 15 个岗位'})) +
+                fArea('底线条件','gfloor', g0?g0.floor:'', {rows:2, ph:'例：不接受外包；不接受长期出差'}),
+          foot:'<button class="btn" data-act="close-modal">取消</button><button class="btn btn-primary" data-act="goal-save">保存</button>' }); return;
+      }
+      case 'goal-save': {
+        var gd = readForm();
+        DB.meta = DB.meta || {};
+        DB.meta.goal = { text:gd.gtext, city:gd.gcity, salary:gd.gsalary, deadline:gd.gdeadline, weekly:gd.gweekly, floor:gd.gfloor };
+        saveAll(); closeModal(); refreshAll(); toast('求职目标已更新'); return;
+      }
+      case 'copilot': openCopilot(el.getAttribute('data-scope'), id); return;
+      case 'copy-copilot': {
+        var cta = document.getElementById('copilotText');
+        if(cta) copyText(cta.value); return;
+      }
+      case 'analysis-save': {
+        var kw = document.getElementById('an_kw_'+id), vd = document.getElementById('an_vd_'+id), nt = document.getElementById('an_nt_'+id);
+        updateItem('opportunities', id, { analysis:{ keywords:kw?kw.value:'', verdict:vd?vd.value:'', notes:nt?nt.value:'' } });
+        refreshAll(); toast('JD 分析已保存'); return;
+      }
+      case 'result-save': {
+        updateItem('opportunities', id, { result: readForm().result || '' });
+        refreshAll(); toast('最终结果已保存'); return;
+      }
+      case 'gap-add-opp': if(o) simpleForm(CFGS.gaps, { oppId:id, source:o.company+' · 手动添加', due:shiftDays(todayStr(),7), status:'待开始' }); return;
+
+      /* --- V2：Action --- */
+      case 'action-add':
+        actionForm({ gapId: el.getAttribute('data-gap') || '', oppId: el.getAttribute('data-opp') || '' }); return;
+      case 'action-edit': { var ae = findById('actions', id); if(ae) actionForm(ae); return; }
+      case 'action-save': {
+        var ad2 = readForm();
+        if(!ad2.title){ toast('请填写 Action 内容'); return; }
+        if(id) updateItem('actions', id, ad2); else addItem('actions', ad2);
+        closeModal(); refreshAll(); toast('Action 已保存'); return;
+      }
+      case 'action-toggle': {
+        var a3 = findById('actions', id);
+        if(a3) updateItem('actions', id, { status: a3.status === '已完成' ? '待开始' : '已完成' });
+        refreshAll(); return;
+      }
+      case 'action-del': removeItem('actions', id); refreshAll(); toast('已删除'); return;
+
+      /* --- V2：Feedback → Lesson → Strategy --- */
+      case 'fb-to-lesson': {
+        var fb4 = findById('feedbacks', el.getAttribute('data-fb'));
+        if(fb4){
+          var oo2 = findById('opportunities', fb4.oppId);
+          _pendingLessonFb = fb4.id;
+          state.tab.feedback = 'ls';
+          simpleForm(CFGS.lessons, { title: fb4.lesson || ('从「'+(oo2?oo2.company:'')+'」反馈中提炼'),
+            content: fb4.lesson || '', evidenceNote: fb4.content || '',
+            source: (oo2?oo2.company:'') + ' · ' + (fb4.channel||''), date: todayStr(), status:'生效中' });
+        } return;
+      }
+      case 'lesson-to-strategy': {
+        var ls2 = findById('lessons', id);
+        if(ls2){
+          _pendingStrategyLesson = ls2.id;
+          state.tab.feedback = 'st';
+          simpleForm(CFGS.strategies, { title:'基于 Lesson 调整：'+ls2.title, lessonId:ls2.id, date:todayStr(), status:'已采纳' });
+        } return;
+      }
+      case 'lesson-to-action': {
+        var ls3 = findById('lessons', id);
+        if(ls3) actionForm({ title:'落实 Lesson：'+ls3.title, oppId:'', gapId:'', priority:'P1', due:shiftDays(todayStr(),7), status:'待开始' });
+        return;
+      }
+
+      /* --- V2：Evidence → Story --- */
+      case 'story-from-ev': {
+        var ev9 = findById('evidence', id);
+        if(ev9){
+          state.tab.interview = 'sb';
+          simpleForm(CFGS.stories, { title:ev9.name, evId:ev9.id, s:ev9.background||'', t:'', a:ev9.action||'', r:ev9.result||'', tags:ev9.tags||'' });
+        } return;
+      }
+
+      /* --- V2：Contacts --- */
+      case 'ct-add':
+        contactForm({ oppId: el.getAttribute('data-opp') || '', company: el.getAttribute('data-co') || '' }); return;
+      case 'ct-edit': { var c9 = findById('contacts', id); if(c9) contactForm(c9); return; }
+      case 'ct-save': {
+        var cd2 = readForm();
+        if(!cd2.name){ toast('请填写联系人姓名'); return; }
+        if(id) updateItem('contacts', id, cd2); else addItem('contacts', cd2);
+        closeModal(); refreshAll(); toast('联系人已保存'); return;
+      }
+      case 'ct-del': removeItem('contacts', id); refreshAll(); toast('已删除'); return;
+
+      /* --- V2：Debrief 反向更新 --- */
+      case 'debrief-to-gap': {
+        var iv2 = findById('interviews', el.getAttribute('data-iv'));
+        if(iv2){
+          var og = findById('opportunities', iv2.oppId);
+          addItem('gaps', { title:'面试暴露：'+String(iv2.gapFound||'').slice(0,26), gapType:'Weak Evidence', oppId: iv2.oppId || '',
+            category:'表达与面试', source:'面试复盘 · '+(iv2.round||'')+(og?(' · '+og.company):''), severity:'高',
+            action: iv2.nextAction || '针对该问题准备新的说法并模拟回答一遍', due: shiftDays(todayStr(),7), status:'待开始' });
+          toast('已转入 Gap & Action，记得补 Action'); refreshAll();
+        } return;
+      }
+      case 'debrief-to-ev': {
+        var iv3 = findById('interviews', el.getAttribute('data-iv'));
+        if(iv3){
+          var og2 = findById('opportunities', iv3.oppId);
+          evForm({ name: iv3.newEvidence || '', category:'面试复盘发现',
+            background:'在'+(og2?og2.company:'')+' '+(iv3.round||'')+'中被追问后，意识到这段经历可以讲。',
+            ability:'', result:'', action:'', story:iv3.myAnswer||'' });
+        } return;
+      }
+      case 'debrief-to-fb': {
+        var iv4 = findById('interviews', el.getAttribute('data-iv'));
+        if(iv4){
+          state.tab.feedback = 'fb';
+          fbForm({ oppId: iv4.oppId || '', date: todayStr(), channel:'面试官',
+            content: iv4.lessonNote || iv4.wentBad || '', lesson: iv4.lessonNote || '', action: iv4.nextAction || '' });
+        } return;
+      }
+
+      case 'iv-add2': ivForm({ date:todayStr() }); return;
+      case 'fb-add2': fbForm({ date:todayStr() }); return;
+    }
+  });
+
+  document.addEventListener('change', function(e){
+    var el = e.target;
+    if(!el || !el.getAttribute) return;
+    var t = el.getAttribute('data-chg');
+    if(!t) return;
+    var id = el.getAttribute('data-id');
+    if(t === 'set-status'){ updateItem('opportunities', id, { status: el.value }); refreshAll(); toast('状态已更新为 '+el.value); }
+    else if(t === 'set-priority'){ updateItem('opportunities', id, { priority: el.value }); refreshAll(); }
+    else if(t === 'set-resume'){ updateItem('opportunities', id, { resumeVersion: el.value }); refreshAll(); }
+    else if(t === 'opp-q'){ state.oppFilter.q = el.value; refreshAll(); refocusOppQ(); }
+    else if(t === 'opp-filter'){ state.oppFilter[el.getAttribute('data-f')] = el.value; refreshAll(); }
+    else if(t === 'ev-q'){ state.evFilter.q = el.value; refreshAll(); }
+    else if(t === 'ev-type'){ state.evFilter.type = el.value; refreshAll(); }
+    else if(t === 'ev-strength'){ state.evFilter.strength = el.value; refreshAll(); }
+  });
+
+  document.getElementById('fileInput').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    if(!f) return;
+    var fr = new FileReader();
+    fr.onload = function(){
+      try{
+        var candidate=validateBackup(JSON.parse(fr.result));
+        confirmBox('覆盖当前'+(IS_DEMO?'演示':'个人')+'数据','请先取消并导出备份。此操作为整包覆盖（不合并），缺失的模块将变为空。确认继续？',function(){
+          DB=candidate; saveAll(); state.selOpp=null; refreshAll(); toast('导入成功');
+        });
+      }catch(err){ toast('导入失败：'+err.message+'；原数据未变'); }
+      e.target.value = '';
+    };
+    fr.onerror=function(){toast('读取文件失败，原数据未变');}; if(f.size>10*1024*1024){toast('文件超过 10MB');e.target.value='';return;} fr.readAsText(f);
+  });
+}
+
+function refocusOppQ(){
+  var q = document.getElementById('oppQ');
+  if(q){ q.focus(); try{ q.setSelectionRange(q.value.length, q.value.length); }catch(e){} }
+}
+
+function copyText(txt){
+  confirmBox('复制前检查隐私','请确认已检查姓名、联系方式、JD 内部信息等隐私。外部 AI 由你自行选择，演示内容不能作为真实经历。',function(){
+    function fallback(){var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';document.body.appendChild(ta);ta.select();try{if(!document.execCommand('copy'))throw Error('copy');toast('已复制到剪贴板');}catch(e){openModal({title:'复制失败，请手动选择',body:'<textarea rows="14">'+esc(txt)+'</textarea>',foot:'<button class="btn" data-act="close-modal">关闭</button>'});}finally{ta.remove();}}
+    if(navigator.clipboard && navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){toast('已复制到剪贴板');},fallback);else fallback();
+  });
+}
+
+function exportJSON(){
+  var out = {}, n = 0;
+  STORES.forEach(function(k){ out[k] = DB[k] || { items:[] }; n += (out[k].items||[]).length; });
+  var blob = new Blob([JSON.stringify(out, null, 2)], { type:'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'job-search-os-backup-' + todayStr() + '.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 400);
+  toast('已导出备份（'+n+' 条记录）');
+}
+
+/* =========================================================
+   预置示例数据（首次打开即可看到完整闭环）
+   ========================================================= */
+function seedDemo(){
+  STORES.forEach(function(k){DB[k]=k==='meta'?{seeded:true}:{items:[]};});
+  DB.meta.goal={text:'演示：体验从 JD 到后续行动的流程',city:'演示城市',salary:'未设定',deadline:shiftDays(todayStr(),60),weekly:'演示：分析一个岗位并关联证据',floor:'请自行填写真实目标'};
+  DB.evidence.items=[{id:'demo-e1',name:'【虚构演示】需求分析练习',type:'产品',strength:'Medium',background:'虚构练习场景，不代表作者经历',action:'整理需求与验收清单',result:'演示材料，无真实业绩',ability:'需求分析',tags:'产品'}];
+  DB.opportunities.items=[{id:'demo-o1',company:'示例组织 A（虚构）',role:'AI 产品经理（演示）',status:'待分析',priority:'P0',jd:'能够梳理用户需求并编写验收标准。\n能够分析数据并设计产品流程。',reqs:[{id:'demo-r1',text:'需求分析',level:'必备',note:'演示'}],matches:[{id:'demo-m1',reqId:'demo-r1',evId:'demo-e1',strength:'中',note:'虚构演示'}],nextAction:'检查 JD 要求与证据匹配',nextDue:todayStr(),statusHistory:[]}];
+  DB.interviews.items=[{id:'demo-iv1',oppId:'demo-o1',date:shiftDays(todayStr(),2),round:'一面',status:'待进行',note:'虚构演示安排'}];
+}
+
+/* =========================================================
+   启动
+   ========================================================= */
+function safeURL(value){try{var u=new URL(value);return /^(https?:)$/.test(u.protocol)?u.href:'#';}catch(e){return '#';}}
+function renderMode(){document.getElementById('modebar').innerHTML='<strong>'+(IS_DEMO?'演示模式 · 所有经历与数据均为虚构':'个人模式 · 仅保存于此浏览器')+'</strong><button class="btn btn-sm" data-act="nav" data-view="case">了解项目设计</button><button class="btn btn-sm" data-act="nav" data-view="dashboard">立即体验 '+(IS_DEMO?'Demo':'工作台')+'</button><button class="btn btn-sm" data-act="switch-mode">切换到'+(IS_DEMO?'个人工作台':'Demo')+'</button><button class="btn btn-sm" data-act="export-json">备份</button><button class="btn btn-sm" data-act="import-json">导入</button><button class="btn btn-sm" data-act="undo">撤销上次修改</button>'+(IS_DEMO?'<button class="btn btn-sm" data-act="demo-reset">重置 Demo</button>':'<button class="btn btn-sm" data-act="reset-data">清空个人数据</button>');}
+function projectCase(){return '<article class="card card-pad case-copy"><h1>Job Search OS · Project Case Study</h1><p>个人求职工作台 V1.1 · 静态网页 / 本地优先 / 无需注册</p><h2>背景与目标用户</h2><p>面向在多个平台投递多个岗位的求职者。信息分散时，JD、个人能力证据和面试反馈难以形成关联。</p><h2>产品思路与已实现功能</h2><p>用岗位 ID 串联 JD 要求、Evidence、投递状态、面试反馈和后续行动。工作台将下一步行动放在首页。</p><ol><li>岗位与 JD：逐条拆解要求、关联证据与识别缺口。</li><li>证据库与简历：复用已有材料，保留证据来源。</li><li>面试与反馈：记录问题，将复盘转为能力缺口与行动。</li><li>数据管理：本地保存、JSON 备份、覆盖导入与单步撤销。</li><li>Copilot：按现有材料组装提示词，复制到外部 AI；本工具不调用模型 API。</li></ol><button class="btn btn-primary" data-act="nav" data-view="opps">体验岗位闭环</button><h2>技术实现与数据边界</h2><p>原生 HTML、CSS、JavaScript 单文件；localStorage 保存，JSON 备份，无数据库、登录或付费 API。V1.1 使用 AI 辅助编程。Demo 和个人模式按存储键隔离。隐私数据仍可被同源脚本及本机用户读取，请勿在共享电脑录入敏感信息。</p><h2>验证与局限</h2><p>功能是否通过测试，以随源码提供的 TEST_REPORT.md 为准。尚未验证实际求职转化效果、长期使用效果或多用户需求。演示内容不代表真实个人经历与业绩。</p><p>漏斗要求各先行阶段均有明确记录；跳阶段或旧记录历史缺失会导致完整链队列少于实际经历人数。这是保守统计，不是全部历史活动统计。当前状态分布独立展示。</p><h2>个人贡献（作者填写）</h2><p>请在下方填写真实需求分析、设计、开发及测试工作；不应将 AI 生成内容自动当作个人贡献。</p><textarea id="contribution" rows="5" aria-label="个人贡献">'+esc(DB.meta.contribution||'')+'</textarea><button class="btn" data-act="save-contribution">保存贡献说明到当前模式</button><h2>下一版规划</h2><p>历史阶段补录、多设备迁移体验、基于真实使用访谈的验证与迭代。没有效率提升或用户规模的已验证指标。</p></article>';}
+function boot(){
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();if(e.key==='Tab'){var m=document.querySelector('.modal');if(m){var a=Array.from(m.querySelectorAll('button,input,textarea,select,a[href]')).filter(function(x){return !x.disabled && x.offsetParent!==null;});var first=a[0],last=a[a.length-1];if(e.shiftKey && document.activeElement===first){last.focus();e.preventDefault();}else if(!e.shiftKey && document.activeElement===last){first.focus();e.preventDefault();}}}});
+  try{loadAll();}catch(e){document.getElementById('content').textContent='读取本地数据失败：'+e.message+'。原存储未被修改，请保留浏览器数据并从已有备份恢复。';return;}
+  bindGlobal();
+  refreshAll();
+}
+if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+
+</script>
+</body>
+</html>
